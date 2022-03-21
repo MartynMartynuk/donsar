@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def bor_calc_page(request):
+    return render(request, template_name='bor_calc_page.html')
