@@ -4,8 +4,8 @@ from django.db import models
 class BorCalculator(models.Model):
     """ Выполняет расчет концентрации БК по полученным данным """
 
-    x = models.IntegerField()
-    y = models.IntegerField()
+    # x = models.IntegerField()
+    # y = models.IntegerField()
 
     @staticmethod
     def getter():
@@ -15,11 +15,11 @@ class BorCalculator(models.Model):
         pass
 
     @staticmethod
-    def returner(x, y):
+    def returner():
         """
         Производит расчет целевой концентрации БК
         :param x:
         :param y:
         :return:
         """
-        return x + y
+        return 5+2
