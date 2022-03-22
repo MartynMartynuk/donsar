@@ -19,5 +19,5 @@ from django.urls import path
 
 urlpatterns = [
     path('', views.bor_calc_page),
-    # path('add/', name='bor_add_album')
+    path('/add/', views.addition_page)
 ]
