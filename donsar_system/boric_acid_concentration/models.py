@@ -4,8 +4,8 @@ from django.db import models
 class BorCalculator(models.Model):
     """ Выполняет расчет концентрации БК по полученным данным """
 
-    param_1 = models.FloatField()
-    param_2 = models.FloatField()
+    # param_1 = models.FloatField()
+    # param_2 = models.FloatField()
 
     # x = models.IntegerField()
     # y = models.IntegerField()
@@ -17,11 +17,9 @@ class BorCalculator(models.Model):
         """
         pass
 
-    def returner(self, x, y):
+    @staticmethod
+    def returner():
         """
         Производит расчет целевой концентрации БК
-        :param x:
-        :param y:
-        :return:
         """
-        return x + y
+        return 5 + 2
