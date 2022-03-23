@@ -9,7 +9,7 @@ class BorCalcForm(forms.ModelForm):
         fields = '__all__'
 
 
-class UploadAlbumForm(forms.Form):
+class UploadAlbumForm(forms.ModelForm):
     class Meta:
         model = Album
         fields = '__all__'
