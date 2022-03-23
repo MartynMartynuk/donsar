@@ -17,6 +17,6 @@ from . import views
 from django.urls import path
 
 urlpatterns = [
-    # path('', views.bor_calc_page),
+    path('', views.bor_calc_page, name='bor_calc'),
     path('add/', views.album_upload_page)
 ]
