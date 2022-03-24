@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from .calculate_function import *
 from .forms import *
 from .models import *
 
@@ -20,8 +21,18 @@ def bor_calc_page(request):
     if request.method == 'POST':
         form = BorCalcForm(request.POST)
         if form.is_valid():
-            result = BorCalculator.returner(form.cleaned_data['param_1'],
-                                            form.cleaned_data['param_2'])
+            try:
+                result = calculator_handler(form.cleaned_data['power_before_stop'],
+                                            form.cleaned_data['effective_days_worked'],
+                                            form.cleaned_data['rod_height_before_stop'],
+                                            form.cleaned_data['crit_conc_before_stop'],
+                                            form.cleaned_data['start_time'],
+                                            'Album.docx')
+            except:
+                print(type(BorCalculator.power_before_stop))
+                print(form.cleaned_data)
+                result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
+
             return render(request, 'bor_calculator/bor_calc_page.html',
                           {'form': form, 'result': result})
     else:

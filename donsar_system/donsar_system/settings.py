@@ -123,5 +123,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'albums')
-MEDIA_URL = '/albums/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'boric_acid_concentration/albums')
+MEDIA_URL = 'boric_acid_concentration/albums/'
