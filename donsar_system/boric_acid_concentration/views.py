@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from .calculate_function import *
 from .forms import *
 from .models import *
+from .album_handler import *
 
 
 # Метод с использованием ModelForm
@@ -11,6 +12,9 @@ def album_upload_page(request):
         form = UploadAlbumForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
+            Album.objects.create(title='table1_rows', content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10))
+            Album.objects.create(title='table1_columns', content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10, 1, True))
+            # print(Album.objects.get(title='table1').content)
             return redirect('bor_calc')
     else:
         form = UploadAlbumForm()

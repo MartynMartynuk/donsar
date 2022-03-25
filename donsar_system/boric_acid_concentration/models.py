@@ -3,7 +3,8 @@ from django.db import models
 
 class Album(models.Model):
     album_file = models.FileField(upload_to='', verbose_name='Альбом НФХ')
-    # album_tables = models.JSONField(null=True)
+    title = models.CharField(max_length=255, verbose_name='Название таблицы', null=True)
+    content = models.JSONField(verbose_name='Значения в таблице', null=True)
 
 
 class BorCalculator(models.Model):

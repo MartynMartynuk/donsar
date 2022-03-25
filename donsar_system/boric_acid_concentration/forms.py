@@ -12,4 +12,4 @@ class BorCalcForm(forms.ModelForm):
 class UploadAlbumForm(forms.ModelForm):
     class Meta:
         model = Album
-        fields = '__all__'
+        fields = ['album_file']
