@@ -138,8 +138,8 @@ def calculator_handler(n0, t, h0, c0, tzap, file_name):
     # print('deltac=', deltac)
     ckrit = c0 + deltac
     # print('Cкрит=', ckrit)
-    return ckrit
+    return ckrit, deltac
 
 
-if __name__ == '__main__':
-    print('!!!', round(calculator_handler(446, 104, 89, 20, 1.22, 'Album.docx'), 4))
+# if __name__ == '__main__':
+#     print('!!!', round(calculator_handler(446, 104, 89, 20, 1.22, 'Album.docx'), 4))

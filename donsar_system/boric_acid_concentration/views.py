@@ -22,17 +22,20 @@ def bor_calc_page(request):
         form = BorCalcForm(request.POST)
         if form.is_valid():
             try:
-                result = calculator_handler(form.cleaned_data['power_before_stop'],
-                                            form.cleaned_data['effective_days_worked'],
-                                            form.cleaned_data['rod_height_before_stop'],
-                                            form.cleaned_data['crit_conc_before_stop'],
-                                            form.cleaned_data['start_time'],
-                                            'Album.docx')
+                calculation_result = calculator_handler(form.cleaned_data['power_before_stop'],
+                                                        form.cleaned_data['effective_days_worked'],
+                                                        form.cleaned_data['rod_height_before_stop'],
+                                                        form.cleaned_data['crit_conc_before_stop'],
+                                                        form.cleaned_data['start_time'],
+                                                        'Album.docx')
+                # result[0] = f'Целевая стартовая концентрация БК: {round(result[0], 3)}'
+                # result[1] = f'Необходимо изменить текущую концентрацию на {round(result[1], 3)}'
+                result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
+                          f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
             except:
                 print(type(BorCalculator.power_before_stop))
                 print(form.cleaned_data)
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
-
             return render(request, 'bor_calculator/bor_calc_page.html',
                           {'form': form, 'result': result})
     else:
