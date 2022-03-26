@@ -22,7 +22,8 @@ def album_upload_page(request):
             Album.objects.create(title='table2_400', content=handler(open_file('Album.docx'), 5, 1, 11, 1, 5))
             Album.objects.create(title='table2_500', content=handler(open_file('Album.docx'), 6, 1, 11, 1, 5))
             Album.objects.create(title='table2_end', content=handler(open_file('Album.docx'), 7, 1, 11, 1, 5))
-            Album.objects.create(title='table3', content=handler(open_file('Album.docx'), 8, 2, 75, 1, 8))
+            Album.objects.create(title='table3', content=handler(open_file('Album.docx'), 8, 2, 75, 1, 8)),
+            Album.objects.create(title='table4', content=handler(open_file('Album.docx'), 9, 1, 28, 1, 15))
             return redirect('bor_calc')
     else:
         form = UploadAlbumForm()
@@ -49,8 +50,9 @@ def bor_calc_page(request):
                                                         Album.objects.get(title='table2_400').content,
                                                         Album.objects.get(title='table2_500').content,
                                                         Album.objects.get(title='table2_end').content,
-                                                        Album.objects.get(title='table3').content
-                                                        )
+                                                        Album.objects.get(title='table3').content,
+                                                        Album.objects.get(title='table4').content)
+
                 result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
                           f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
             except:

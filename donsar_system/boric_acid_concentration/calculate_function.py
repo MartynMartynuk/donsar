@@ -43,8 +43,7 @@ def function2(table, h0):
 def calculator_handler(n0, t, h0, c0, tzap, file_name,
                        table1_rows, table1_columns, table2_start, table2_100,
                        table2_200, table2_300, table2_400, table2_500, table2_end,
-                       table3):
-    docum = Document(MEDIA_ROOT + '/' + file_name)
+                       table3, table4):
 
     # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
     # поиск эффекта реактивности из таблицы 5.9
@@ -126,24 +125,18 @@ def calculator_handler(n0, t, h0, c0, tzap, file_name,
     ptot = p1 + p2 + p3
 
     # Раздел 4. Эффективность БК
-    table4 = docum.tables[9]
-    for i in range(1, 28):
-        if float(table4.rows[i].cells[0].text.strip().replace(',', '.')) > t:
-            tmax = float(table4.rows[i].cells[0].text.strip().replace(',', '.'))
-            tmin = float(table4.rows[i - 1].cells[0].text.strip().replace(',', '.'))
+    table4_key = list(table4.keys())
+    for i in range(0, 27):
+        if float(table4_key[i].replace(',', '.')) > t:
+            table4_t_max = float(table4_key[i].replace(',', '.'))
+            table4_t_min = float(table4_key[i-1].replace(',', '.'))
             break
 
-    dcmax = float(table4.rows[i].cells[12].text.strip().replace(',', '.'))
-    dcmin = float(table4.rows[i - 1].cells[12].text.strip().replace(',', '.'))
-    dc = dcmin + (t - tmin) * (dcmax - dcmin) / (tmax - tmin)
+    dc_max = float(table4[table4_key[i]][11].replace(',', '.'))
+    dc_min = float(table4[table4_key[i-1]][11].replace(',', '.'))
+    dc = dc_min + (t - table4_t_min) * (dc_max - dc_min) / (table4_t_max - table4_t_min)
 
     # Раздел 5. Определение дельта С и Скрит
     deltac = ptot / (-dc)
-    # print('deltac=', deltac)
     ckrit = c0 + deltac
-    # print('Cкрит=', ckrit)
     return ckrit, deltac
-
-
-# if __name__ == '__main__':
-#     print('!!!', round(calculator_handler(446, 104, 89, 20, 1.22, 'Album.docx'), 4))
