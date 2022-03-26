@@ -45,11 +45,5 @@ def handler(document: Document, table_number: int, row_start: int, row_end: int,
 
 
 if __name__ == '__main__':
-    print(handler(open_file('Album.docx'), 1, 1, 11, 1, 5))
-    print(handler(open_file('Album.docx'), 2, 1, 11, 1, 5))
-    print(handler(open_file('Album.docx'), 3, 1, 11, 1, 5))
-    print(handler(open_file('Album.docx'), 4, 1, 11, 1, 5))
-    print(handler(open_file('Album.docx'), 5, 1, 11, 1, 5))
-    print(handler(open_file('Album.docx'), 6, 1, 11, 1, 5))
-    print(handler(open_file('Album.docx'), 7, 1, 11, 1, 5))
+    print(handler(open_file('Album.docx'), 8, 2, 75, 1, 8))
     # print(handler(open_file('Album.docx'), 0, 2, 28, 1, 10, 1, True))

@@ -39,21 +39,11 @@ def function2(table, h0):
     pp_inter = pp_min + (h0 - h_min) * (pp_max - pp_min) / (h_max - h_min)
     return float(table[key[7]][0].replace(',', '.')) - pp_inter
 
-    # for i in range(1, 12):
-    #     if int(table.rows[i].cells[0].text.strip()) < h0:
-    #         hmin = int(table.rows[i].cells[0].text.strip())
-    #         hmax = int(table.rows[i - 1].cells[0].text.strip())
-    #         break
-    # ppmin = float(table.rows[i].cells[1].text.strip().replace(',', '.'))
-    # ppmax = float(table.rows[i - 1].cells[1].text.strip().replace(',', '.'))
-    # ppinter = ppmin + (h0 - hmin) * (ppmax - ppmin) / (hmax - hmin)
-    # p2 = float(table.rows[7].cells[1].text.strip().replace(',', '.')) - ppinter
-    # return p2
-
 
 def calculator_handler(n0, t, h0, c0, tzap, file_name,
                        table1_rows, table1_columns, table2_start, table2_100,
-                       table2_200, table2_300, table2_400, table2_500, table2_end):
+                       table2_200, table2_300, table2_400, table2_500, table2_end,
+                       table3):
     docum = Document(MEDIA_ROOT + '/' + file_name)
 
     # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
@@ -114,24 +104,23 @@ def calculator_handler(n0, t, h0, c0, tzap, file_name,
         p2 = function1(table21, table22, h0, t, 500, 550)  # ?????-вопрос о большем времени
 
     # Раздел 3. Эффект реактивности, вызванный ксеноном
-    table3 = docum.tables[8]
-    for i in range(2, 75):
-        if int(table3.rows[i].cells[0].text.strip()) == tzap:
+    key = list(table3.keys())
+    table3_column_names = [0, 100, 200, 300, 400, 500]
+    for i in range(0, 73):
+        if int(key[i]) == tzap:
             break
-        elif tzap > 72:  # ???
+        elif tzap > 72:
             i = 74
-            # k = input('Нажмите Enter для выхода')
-            # raise MyExep("Данный случай не рассматривается, обратитесь в ОЯБиН")
 
-    for j in range(1, 7):
-        if int(table3.rows[1].cells[j].paragraphs[0].text.strip()) > t:
-            tmax = int(table3.rows[1].cells[j].paragraphs[0].text.strip())
-            tmin = int(table3.rows[1].cells[j - 1].paragraphs[0].text.strip())
+    for j in range(0, 6):
+        if table3_column_names[j] > t:
+            t_max = table3_column_names[j]
+            t_min = table3_column_names[j-1]
+            break
+    p3_min = float(table3[key[i]][j-1].replace(',', '.'))
+    p3_max = float(table3[key[i]][j].replace(',', '.'))
 
-    p3min = float(table3.rows[i].cells[j - 1].text.strip().replace(',', '.'))
-    p3max = float(table3.rows[i].cells[j].text.strip().replace(',', '.'))
-
-    p3 = p3min + (t - tmin) * (p3max - p3min) / (tmax - tmin)
+    p3 = p3_min + (t - tmin) * (p3_max - p3_min) / (tmax - tmin)
 
     # Раздел 3+. Общая реактивность
     ptot = p1 + p2 + p3
