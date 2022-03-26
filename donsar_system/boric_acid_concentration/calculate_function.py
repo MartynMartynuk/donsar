@@ -1,7 +1,3 @@
-from docx import Document
-from donsar_system.settings import MEDIA_ROOT
-
-
 def function1(table1, table2, h0, t, min_day, max_day):  # x-меньшие сутки; y-большие сутки из названий таблиц
     key = list(table1.keys())
     for i in range(0, 12):
@@ -40,25 +36,24 @@ def function2(table, h0):
     return float(table[key[7]][0].replace(',', '.')) - pp_inter
 
 
-def calculator_handler(n0, t, h0, c0, tzap, file_name,
-                       table1_rows, table1_columns, table2_start, table2_100,
-                       table2_200, table2_300, table2_400, table2_500, table2_end,
-                       table3, table4):
+def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
+                       table2_100, table2_200, table2_300, table2_400,
+                       table2_500, table2_end, table3, table4):
 
     # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
     # поиск эффекта реактивности из таблицы 5.9
-    row_keys = list(table1_rows.keys())
-    column_keys = list(table1_columns.keys())
+    row_keys = list(table1.keys())
+    columns = [104, 100, 90, 80, 70, 60, 50, 40, 30]
     for i in range(2, 28):
         if int(row_keys[i]) > t:
             tmax = int(row_keys[i])
             tmin = int(row_keys[i - 1])
             break
     for j in range(0, 10):
-        if int(column_keys[j]) == n0:
+        if int(columns[j]) == n0:
             break
-    p1_min = float(table1_rows[row_keys[i-1]][j].replace(',', '.'))
-    p1_max = float(table1_rows[row_keys[i]][j].replace(',', '.'))
+    p1_min = float(table1[row_keys[i - 1]][j].replace(',', '.'))
+    p1_max = float(table1[row_keys[i]][j].replace(',', '.'))
     p1 = p1_min + (t - tmin) * (p1_max - p1_min) / (tmax - tmin)
 
     # Раздел 2. Поиск эффекта реактивности за счет изменения положения 10й группы до 40%

@@ -12,9 +12,7 @@ def album_upload_page(request):
         form = UploadAlbumForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            Album.objects.create(title='table1_rows', content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10))
-            Album.objects.create(title='table1_columns',
-                                 content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10, 1, True))
+            Album.objects.create(title='table1', content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10))
             Album.objects.create(title='table2_start', content=handler(open_file('Album.docx'), 1, 1, 11, 1, 5))
             Album.objects.create(title='table2_100', content=handler(open_file('Album.docx'), 2, 1, 11, 1, 5))
             Album.objects.create(title='table2_200', content=handler(open_file('Album.docx'), 3, 1, 11, 1, 5))
@@ -40,9 +38,7 @@ def bor_calc_page(request):
                                                         form.cleaned_data['rod_height_before_stop'],
                                                         form.cleaned_data['crit_conc_before_stop'],
                                                         form.cleaned_data['start_time'],
-                                                        'Album.docx',
-                                                        Album.objects.get(title='table1_rows').content,
-                                                        Album.objects.get(title='table1_columns').content,
+                                                        Album.objects.get(title='table1').content,
                                                         Album.objects.get(title='table2_start').content,
                                                         Album.objects.get(title='table2_100').content,
                                                         Album.objects.get(title='table2_200').content,
