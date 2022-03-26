@@ -39,23 +39,26 @@ def function2(table21, h0):
     return p2
 
 
-def calculator_handler(n0, t, h0, c0, tzap, file_name):
+def calculator_handler(n0, t, h0, c0, tzap, file_name,
+                       table1_rows, table1_columns):
     docum = Document(MEDIA_ROOT + '/' + file_name)
 
     # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
     # поиск эффекта реактивности из таблицы 5.9
     table1 = docum.tables[0]
+    row_keys = list(table1_rows.keys())
+    column_keys = list(table1_columns.keys())
     for i in range(2, 28):
-        if int(table1.rows[i].cells[0].text.strip()) > t:
-            tmax = int(table1.rows[i].cells[0].text.strip())
-            tmin = int(table1.rows[i - 1].cells[0].text.strip())
+        if int(row_keys[i]) > t:
+            tmax = int(row_keys[i])
+            tmin = int(row_keys[i - 1])
             break
-    for j in range(1, 10):
-        if int(table1.rows[1].cells[j].text.strip()) == n0:
+    for j in range(0, 10):
+        if int(column_keys[j]) == n0:
             break
-    p1min = float(table1.rows[i - 1].cells[j].text.strip().replace(',', '.'))
-    p1max = float(table1.rows[i].cells[j].text.strip().replace(',', '.'))
-    p1 = p1min + (t - tmin) * (p1max - p1min) / (tmax - tmin)
+    p1_min = float(table1_rows[row_keys[i-1]][j].replace(',', '.'))
+    p1_max = float(table1_rows[row_keys[i]][j].replace(',', '.'))
+    p1 = p1_min + (t - tmin) * (p1_max - p1_min) / (tmax - tmin)
 
     # Раздел 2. Поиск эффекта реактивности за счет изменения положения 10й группы до 40%
     if t < 100:

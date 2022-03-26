@@ -31,15 +31,20 @@ def bor_calc_page(request):
                                                         form.cleaned_data['rod_height_before_stop'],
                                                         form.cleaned_data['crit_conc_before_stop'],
                                                         form.cleaned_data['start_time'],
-                                                        'Album.docx')
+                                                        'Album.docx',
+                                                        Album.objects.get(title='table1_rows').content,
+                                                        Album.objects.get(title='table1_columns').content)
                 # result[0] = f'Целевая стартовая концентрация БК: {round(result[0], 3)}'
                 # result[1] = f'Необходимо изменить текущую концентрацию на {round(result[1], 3)}'
                 result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
                           f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
             except:
-                print(type(BorCalculator.power_before_stop))
-                print(form.cleaned_data)
+                # print(type(BorCalculator.power_before_stop))
+                # print(Album.objects.get(title='table1_rows').content,
+                #       Album.objects.get(title='table1_columns').content)
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
+                return (request, 'bor_calculator/bor_calc_page.html',
+                          {'form': form, 'result': result})
             return render(request, 'bor_calculator/bor_calc_page.html',
                           {'form': form, 'result': result})
     else:
