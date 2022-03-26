@@ -13,8 +13,15 @@ def album_upload_page(request):
         if form.is_valid():
             form.save()
             Album.objects.create(title='table1_rows', content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10))
-            Album.objects.create(title='table1_columns', content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10, 1, True))
-            # print(Album.objects.get(title='table1').content)
+            Album.objects.create(title='table1_columns',
+                                 content=handler(open_file('Album.docx'), 0, 2, 28, 1, 10, 1, True))
+            Album.objects.create(title='table2_start', content=handler(open_file('Album.docx'), 1, 1, 11, 1, 5))
+            Album.objects.create(title='table2_100', content=handler(open_file('Album.docx'), 2, 1, 11, 1, 5))
+            Album.objects.create(title='table2_200', content=handler(open_file('Album.docx'), 3, 1, 11, 1, 5))
+            Album.objects.create(title='table2_300', content=handler(open_file('Album.docx'), 4, 1, 11, 1, 5))
+            Album.objects.create(title='table2_400', content=handler(open_file('Album.docx'), 5, 1, 11, 1, 5))
+            Album.objects.create(title='table2_500', content=handler(open_file('Album.docx'), 6, 1, 11, 1, 5))
+            Album.objects.create(title='table2_end', content=handler(open_file('Album.docx'), 7, 1, 11, 1, 5))
             return redirect('bor_calc')
     else:
         form = UploadAlbumForm()
@@ -33,18 +40,21 @@ def bor_calc_page(request):
                                                         form.cleaned_data['start_time'],
                                                         'Album.docx',
                                                         Album.objects.get(title='table1_rows').content,
-                                                        Album.objects.get(title='table1_columns').content)
-                # result[0] = f'Целевая стартовая концентрация БК: {round(result[0], 3)}'
-                # result[1] = f'Необходимо изменить текущую концентрацию на {round(result[1], 3)}'
+                                                        Album.objects.get(title='table1_columns').content,
+                                                        Album.objects.get(title='table2_start').content,
+                                                        Album.objects.get(title='table2_100').content,
+                                                        Album.objects.get(title='table2_200').content,
+                                                        Album.objects.get(title='table2_300').content,
+                                                        Album.objects.get(title='table2_400').content,
+                                                        Album.objects.get(title='table2_500').content,
+                                                        Album.objects.get(title='table2_end').content,
+                                                        )
                 result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
                           f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
             except:
-                # print(type(BorCalculator.power_before_stop))
-                # print(Album.objects.get(title='table1_rows').content,
-                #       Album.objects.get(title='table1_columns').content)
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
                 return (request, 'bor_calculator/bor_calc_page.html',
-                          {'form': form, 'result': result})
+                        {'form': form, 'result': result})
             return render(request, 'bor_calculator/bor_calc_page.html',
                           {'form': form, 'result': result})
     else:
