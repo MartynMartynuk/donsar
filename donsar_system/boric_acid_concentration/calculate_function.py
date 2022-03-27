@@ -1,3 +1,6 @@
+from boric_acid_concentration.models import Album
+
+
 def function1(table1, table2, h0, t, min_day, max_day):  # x-меньшие сутки; y-большие сутки из названий таблиц
     key = list(table1.keys())
     for i in range(0, 12):
@@ -39,7 +42,7 @@ def function2(table, h0):
 def calculator_handler(n0, t, h0, c0, tzap, table1, table2_start,
                        table2_100, table2_200, table2_300, table2_400,
                        table2_500, table2_end, table3, table4):
-
+    # print('++++++++++++++++++++++++', Album.objects.get(title='table1').content)
     # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
     # поиск эффекта реактивности из таблицы 5.9
     row_keys = list(table1.keys())

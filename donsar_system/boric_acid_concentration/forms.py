@@ -3,7 +3,15 @@ from django.core.exceptions import ValidationError
 from .models import BorCalculator, Album
 
 
+class UploadAlbumForm(forms.ModelForm):
+    """ Форма добавления нового альбома НФХ """
+    class Meta:
+        model = Album
+        fields = ['album_file', 'block']
+
+
 class BorCalcForm(forms.ModelForm):
+    """ Форма расчета концентрации БК """
     class Meta:
         model = BorCalculator
         fields = '__all__'
@@ -41,9 +49,3 @@ class BorCalcForm(forms.ModelForm):
         if time < 0:
             raise ValidationError('Некорректный ввод: время старта не может быть меньше 0!')
         return time
-
-
-class UploadAlbumForm(forms.ModelForm):
-    class Meta:
-        model = Album
-        fields = ['album_file']
