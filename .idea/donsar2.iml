@@ -7,4 +7,11 @@
     <orderEntry type="jdk" jdkName="Python 3.8 (donsar-system)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/donsar_system/templates/static" />
+      </list>
+    </option>
+  </component>
 </module>

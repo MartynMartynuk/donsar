@@ -36,7 +36,7 @@ def function2(table, h0):
     return float(table[key[7]][0].replace(',', '.')) - pp_inter
 
 
-def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
+def calculator_handler(n0, t, h0, c0, tzap, table1, table2_start,
                        table2_100, table2_200, table2_300, table2_400,
                        table2_500, table2_end, table3, table4):
 
@@ -46,15 +46,15 @@ def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
     columns = [104, 100, 90, 80, 70, 60, 50, 40, 30]
     for i in range(2, 28):
         if int(row_keys[i]) > t:
-            tmax = int(row_keys[i])
-            tmin = int(row_keys[i - 1])
+            t_max = int(row_keys[i])
+            t_min = int(row_keys[i - 1])
             break
     for j in range(0, 10):
         if int(columns[j]) == n0:
             break
     p1_min = float(table1[row_keys[i - 1]][j].replace(',', '.'))
     p1_max = float(table1[row_keys[i]][j].replace(',', '.'))
-    p1 = p1_min + (t - tmin) * (p1_max - p1_min) / (tmax - tmin)
+    p1 = p1_min + (t - t_min) * (p1_max - p1_min) / (t_max - t_min)
 
     # Раздел 2. Поиск эффекта реактивности за счет изменения положения 10й группы до 40%
     if t < 100:
@@ -89,10 +89,10 @@ def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
         table21 = table2_400
         table22 = table2_500
         p2 = function1(table21, table22, h0, t, 400, 500)
-    elif t == 500:
+    elif t == 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
         table21 = table2_500
         p2 = function2(table21, h0)
-    elif t > 500:
+    elif t > 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
         table21 = table2_500
         table22 = table2_end
         p2 = function1(table21, table22, h0, t, 500, 550)  # ?????-вопрос о большем времени
@@ -104,7 +104,7 @@ def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
         if int(key[i]) == tzap:
             break
         elif tzap > 72:
-            i = 74
+            i = 72
 
     for j in range(0, 6):
         if table3_column_names[j] > t:
@@ -114,10 +114,10 @@ def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
     p3_min = float(table3[key[i]][j-1].replace(',', '.'))
     p3_max = float(table3[key[i]][j].replace(',', '.'))
 
-    p3 = p3_min + (t - tmin) * (p3_max - p3_min) / (tmax - tmin)
+    p3 = p3_min + (t - t_min) * (p3_max - p3_min) / (t_max - t_min)
 
     # Раздел 3+. Общая реактивность
-    ptot = p1 + p2 + p3
+    p_tot = p1 + p2 + p3
 
     # Раздел 4. Эффективность БК
     table4_key = list(table4.keys())
@@ -132,6 +132,6 @@ def calculator_handler(n0, t, h0, c0, tzap, table1,table2_start,
     dc = dc_min + (t - table4_t_min) * (dc_max - dc_min) / (table4_t_max - table4_t_min)
 
     # Раздел 5. Определение дельта С и Скрит
-    deltac = ptot / (-dc)
-    ckrit = c0 + deltac
-    return ckrit, deltac
+    delta_c = p_tot / (-dc)
+    c_krit = c0 + delta_c
+    return c_krit, delta_c
