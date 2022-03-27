@@ -6,9 +6,9 @@ from .album_handler import *
 
 
 # Метод с использованием ModelForm
-def album_upload_page(request):
+def add_album_page(request):
     if request.method == 'POST':
-        form = UploadAlbumForm(request.POST, request.FILES)
+        form = AddAlbumForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             file_name = str(request.FILES['album_file']).replace(' ', '_')
@@ -26,8 +26,19 @@ def album_upload_page(request):
             Album.objects.create(title='table4', content=handler(document_obj, 9, 1, 28, 1, 15), block_id=block_id)
             return redirect('bor_calc')
     else:
-        form = UploadAlbumForm()
+        form = AddAlbumForm()
     return render(request, 'bor_calculator/album_upload_page.html', {'form': form})
+
+
+def add_album_name_page(request):
+    if request.method == 'POST':
+        form = AddAlbumNameForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('add_album')
+    else:
+        form = AddAlbumNameForm()
+    return render(request, 'bor_calculator/add_album_name_page.html', {'form': form})
 
 
 def bor_calc_page(request):

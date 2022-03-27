@@ -1,13 +1,20 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import BorCalculator, Album
+from .models import BorCalculator, Album, Block
 
 
-class UploadAlbumForm(forms.ModelForm):
+class AddAlbumForm(forms.ModelForm):
     """ Форма добавления нового альбома НФХ """
     class Meta:
         model = Album
         fields = ['album_file', 'block']
+
+
+class AddAlbumNameForm(forms.ModelForm):
+    """ Форма добавления нового имени альбома НФХ """
+    class Meta:
+        model = Block
+        fields = '__all__'
 
 
 class BorCalcForm(forms.ModelForm):

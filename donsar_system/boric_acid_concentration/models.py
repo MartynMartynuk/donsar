@@ -10,8 +10,8 @@ class Album(models.Model):
 
 
 class Block(models.Model):
-    block_number = models.IntegerField(db_index=True)
-    batch_number = models.IntegerField(db_index=True)
+    block_number = models.IntegerField(db_index=True, verbose_name='Номер блока')
+    batch_number = models.IntegerField(db_index=True, verbose_name='Номер загрузки')
 
     def __str__(self):
         return f'Блок {self.block_number} загрузка {self.batch_number}'

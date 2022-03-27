@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'boric_acid_concentration'
+    'boric_acid_concentration.apps.BoricAcidConcentrationConfig'
 ]
 
 MIDDLEWARE = [
