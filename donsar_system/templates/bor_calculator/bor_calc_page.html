@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
 <form action="" method="post">
     {% csrf_token %}
     {% for f in form %}
@@ -21,22 +16,11 @@
             </li>
         {% endfor %}
         </ul>
-
-
-
-<!--     <p><label class="form-label"> </label>{{ result }}</p>-->
     </div>
 </form>
+{% endblock %}
 
-<ul>
-    <li>
-        <a href="{% url 'main_page' %}">На главную</a>
-    </li>
-    <li>
-        <a href="{% url 'add_album' %}">Добавить альбом</a>
-    </li>
-</ul>
-
-
-</body>
-</html>
+{% block links %}
+    <li><a href="{% url 'main_page' %}">На главную</a></li>
+    <li><a href="{% url 'add_album' %}">Добавить альбом</a></li>
+{% endblock %}
