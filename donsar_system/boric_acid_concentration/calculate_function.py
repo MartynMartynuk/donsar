@@ -39,10 +39,19 @@ def function2(table, h0):
     return float(table[key[7]][0].replace(',', '.')) - pp_inter
 
 
-def calculator_handler(n0, t, h0, c0, tzap, table1, table2_start,
-                       table2_100, table2_200, table2_300, table2_400,
-                       table2_500, table2_end, table3, table4):
-    # print('++++++++++++++++++++++++', Album.objects.get(title='table1').content)
+def calculator_handler(n0, t, h0, c0, tzap, block_id):
+
+    table1 = Album.objects.get(title='table1', block_id=block_id).content
+    table2_start = Album.objects.get(title='table2_start', block_id=block_id).content
+    table2_100 = Album.objects.get(title='table2_100', block_id=block_id).content
+    table2_200 = Album.objects.get(title='table2_200', block_id=block_id).content
+    table2_300 = Album.objects.get(title='table2_300', block_id=block_id).content
+    table2_400 = Album.objects.get(title='table2_400', block_id=block_id).content
+    table2_500 = Album.objects.get(title='table2_500', block_id=block_id).content
+    table2_end = Album.objects.get(title='table2_end', block_id=block_id).content
+    table3 = Album.objects.get(title='table3', block_id=block_id).content
+    table4 = Album.objects.get(title='table4', block_id=block_id).content
+
     # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
     # поиск эффекта реактивности из таблицы 5.9
     row_keys = list(table1.keys())

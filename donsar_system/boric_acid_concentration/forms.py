@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import *
+from .models import Album, Block
 
 
 class AddAlbumForm(forms.ModelForm):
@@ -17,11 +17,14 @@ class AddAlbumNameForm(forms.ModelForm):
         fields = '__all__'
 
 
-class BorCalcForm(forms.ModelForm):
+class BorCalcForm(forms.Form):
     """ Форма расчета концентрации БК """
-    class Meta:
-        model = BorCalculator
-        fields = '__all__'
+    power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки (% от Nном)')
+    effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
+    rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова (%)')
+    crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова')
+    start_time = forms.FloatField(label='Время, через которое будет осуществляться запуск (часов)')
+    block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбрано')
 
     def clean_power_before_stop(self):
         power = self.cleaned_data['power_before_stop']
@@ -56,3 +59,11 @@ class BorCalcForm(forms.ModelForm):
         if time < 0:
             raise ValidationError('Некорректный ввод: время старта не может быть меньше 0!')
         return time
+
+
+# legacy
+# class BorCalcForm(forms.ModelForm):
+#     """ Форма расчета концентрации БК """
+#     class Meta:
+#         model = BorCalculator
+#         fields = '__all__'
