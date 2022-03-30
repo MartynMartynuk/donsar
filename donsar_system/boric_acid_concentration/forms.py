@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import BorCalculator, Album, Block
+from .models import *
 
 
 class AddAlbumForm(forms.ModelForm):
