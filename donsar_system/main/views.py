@@ -8,4 +8,5 @@ menu = [{'title': 'Главная', 'url_name': 'main_page'},
 
 
 def main_page(request):
-    return render(request, 'main.html', {'title': 'Система ОЯБиН', 'menu': menu})
+    return render(request, 'main.html', {'title': 'Система ОЯБиН'})
+    # return render(request, 'index.html', )#{'title': 'Система ОЯБиН', 'menu': menu})
