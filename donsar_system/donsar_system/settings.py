@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'boric_acid_concentration.apps.BoricAcidConcentrationConfig'
+    'boric_acid_concentration.apps.BoricAcidConcentrationConfig',
+    'crispy_forms'
 ]
 
 MIDDLEWARE = [
@@ -117,8 +118,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'templates/static')
-STATICFILES_DIRS = []
+# STATIC_ROOT = os.path.join(BASE_DIR, 'templates/static')
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -127,3 +128,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'boric_acid_concentration/albums')
 MEDIA_URL = '/albums/'
+
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
