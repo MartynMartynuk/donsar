@@ -7,14 +7,14 @@ class AddAlbumForm(forms.ModelForm):
     """ Форма добавления нового альбома НФХ """
     class Meta:
         model = Album
-        fields = ['album_file', 'block']
+        fields = ['album_file']
 
-
-class AddAlbumNameForm(forms.ModelForm):
-    """ Форма добавления нового имени альбома НФХ """
-    class Meta:
-        model = Block
-        fields = '__all__'
+# Теперь название добавляется автоматически по названию документа
+# class AddAlbumNameForm(forms.ModelForm):
+#     """ Форма добавления нового имени альбома НФХ """
+#     class Meta:
+#         model = Block
+#         fields = '__all__'
 
 
 class BorCalcForm(forms.Form):
