@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for f in form %}
-        <p><label class="form-label">{{f.label}}: </label>{{ f }}</p>
-        <div class="form-error">{{ f.errors }}</div>
+    <div class="form-row col-md-6 mb-0">
+        {{ f|as_crispy_field }}
+    </div>
+<!--        <p><label class="form-label">{{f.label}}: </label>{{ f }}</p>-->
+<!--        <div class="form-error">{{ f.errors }}</div>-->
     {% endfor %}
     <button type="submit">Добавить</button>
 </form>
