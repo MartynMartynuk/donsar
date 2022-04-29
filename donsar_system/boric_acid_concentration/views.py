@@ -37,17 +37,6 @@ def add_album_page(request):
     return render(request, 'bor_calculator/album_upload_page.html', {'title': 'Добавление альбома', 'form': form})
 
 
-def add_album_name_page(request):
-    if request.method == 'POST':
-        form = AddAlbumNameForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('add_album')
-    else:
-        form = AddAlbumNameForm()
-    return render(request, 'bor_calculator/add_album_name_page.html', {'title': 'Добавление имени альбома', 'form': form})
-
-
 def bor_calc_page(request):
     if request.method == 'POST':
         form = BorCalcForm(request.POST)

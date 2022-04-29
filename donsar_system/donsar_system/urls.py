@@ -20,9 +20,8 @@ from django.urls import path, include
 from . import settings
 
 urlpatterns = [
-    path('', include('main.urls')),
+    path('', include('boric_acid_concentration.urls')),
     path('admin/', admin.site.urls),
-    path('bc/', include('boric_acid_concentration.urls'))
 ]
 
 if settings.DEBUG:
