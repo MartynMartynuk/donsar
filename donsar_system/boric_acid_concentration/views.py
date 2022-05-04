@@ -1,11 +1,18 @@
+import base64
+import io
+import urllib.parse
+
 from django.shortcuts import render, redirect
+import matplotlib.pyplot as plt
 from .calculate_function import *
 from .forms import *
 from .models import *
 from .album_handler import *
 
-
 # Метод с использованием ModelForm
+from .water_exchange_function import critical_curve_calculator
+
+
 def add_album_page(request):
     if request.method == 'POST':
         form = AddAlbumForm(request.POST, request.FILES)
@@ -29,7 +36,7 @@ def add_album_page(request):
             Album.objects.create(title='table2_400', content=handler(document_obj, 5, 1, 11, 1, 5), block_id=block_id)
             Album.objects.create(title='table2_500', content=handler(document_obj, 6, 1, 11, 1, 5), block_id=block_id)
             Album.objects.create(title='table2_end', content=handler(document_obj, 7, 1, 11, 1, 5), block_id=block_id)
-            Album.objects.create(title='table3', content=handler(document_obj, 8, 2, 75, 1, 8), block_id=block_id),
+            Album.objects.create(title='table3', content=handler(document_obj, 8, 2, 75, 1, 8), block_id=block_id)
             Album.objects.create(title='table4', content=handler(document_obj, 9, 1, 28, 1, 15), block_id=block_id)
             return redirect('bor_calc')
     else:
@@ -44,21 +51,48 @@ def bor_calc_page(request):
             try:
                 block_id = int(request.POST['block'])
                 print(block_id)
-                calculation_result = calculator_handler(form.cleaned_data['power_before_stop'],
-                                                        form.cleaned_data['effective_days_worked'],
-                                                        form.cleaned_data['rod_height_before_stop'],
-                                                        form.cleaned_data['crit_conc_before_stop'],
-                                                        form.cleaned_data['start_time'],
-                                                        block_id)
+                # calculation_result = calculator_handler(form.cleaned_data['power_before_stop'],
+                #                                         form.cleaned_data['effective_days_worked'],
+                #                                         form.cleaned_data['rod_height_before_stop'],
+                #                                         form.cleaned_data['crit_conc_before_stop'],
+                #                                         form.cleaned_data['start_time'],
+                #                                         block_id)
+                calculation_result = critical_curve_calculator(form.cleaned_data['power_before_stop'],
+                                                               form.cleaned_data['effective_days_worked'],
+                                                               form.cleaned_data['rod_height_before_stop'],
+                                                               form.cleaned_data['crit_conc_before_stop'],
+                                                               block_id)
 
-                result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
-                          f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
+                # result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
+                #           f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
+                result = calculation_result
             except:
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
                 return (request, 'bor_calculator/bor_calc_page.html',
                         {'form': form, 'result': result})
-            return render(request, 'bor_calculator/bor_calc_page.html',
-                          {'form': form, 'result': result})
+            # return render(request, 'bor_calculator/bor_calc_page.html',
+            #               {'form': form, 'result': result})
+            # return redirect('add_points')
+            return add_points_page(request, calculation_result)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
+
+
+def add_points_page(request, calc_dict):
+    plt.plot(list(calc_dict.keys()), list(calc_dict.values()))
+    fig = plt.gcf()
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    string = base64.b64encode(buf.read())
+    uri = urllib.parse.quote(string)
+
+    if request.method == 'POST':
+        form = AddPointsForm(request.POST)
+        if form.is_valid():
+            return render(request, 'bor_calculator/add_points_page.html',
+                          {'title': 'Расчет концентрации БК', 'form': form})
+    else:
+        form = AddPointsForm()
+    return render(request, 'bor_calculator/add_points_page.html', {'title': 'Водообмен', 'form': form, 'graph': uri})

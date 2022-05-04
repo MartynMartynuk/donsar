@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for f in form %}
+        <div class="form-row col-md-6 mb-0">
+            {{ f|as_crispy_field }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Добавить</button>
+    </form>
+
+    <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
+{% endblock %}
+
+{% block links %}
+    <li><a href="{% url 'main_page' %}">На главную</a></li>
+    <li><a href="{% url 'add_album' %}">Добавить альбом</a></li>
+{% endblock %}
