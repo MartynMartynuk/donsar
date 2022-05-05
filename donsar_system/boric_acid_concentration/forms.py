@@ -23,8 +23,9 @@ class BorCalcForm(forms.Form):
     effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
     rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова (%)')
     crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова')
-    # stop_time = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'], label='Время останова')
-    # start_time = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'], label='Время запуска')
+    stop_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время останова')
+    start_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время запуска')
+    stop_conc = forms.FloatField(label='Стояночная концентрация БК')
     # start_time = forms.FloatField(label='Время, через которое будет осуществляться запуск (часов)')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбрано')
 

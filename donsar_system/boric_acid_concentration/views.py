@@ -1,4 +1,5 @@
 import base64
+import datetime
 import io
 import urllib.parse
 
@@ -61,7 +62,10 @@ def bor_calc_page(request):
                                                                form.cleaned_data['effective_days_worked'],
                                                                form.cleaned_data['rod_height_before_stop'],
                                                                form.cleaned_data['crit_conc_before_stop'],
-                                                               block_id)
+                                                               form.cleaned_data['stop_time'],
+                                                               form.cleaned_data['start_time'],
+                                                               block_id,
+                                                               form.cleaned_data['stop_conc'])
 
                 # result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
                 #           f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
@@ -73,6 +77,7 @@ def bor_calc_page(request):
             # return render(request, 'bor_calculator/bor_calc_page.html',
             #               {'form': form, 'result': result})
             # return redirect('add_points')
+            print('!!!', (form.cleaned_data['start_time']-form.cleaned_data['stop_time']).seconds/60)
             return add_points_page(request, calculation_result)
     else:
         form = BorCalcForm()
@@ -80,7 +85,8 @@ def bor_calc_page(request):
 
 
 def add_points_page(request, calc_dict):
-    plt.plot(list(calc_dict.keys()), list(calc_dict.values()))
+    plt.plot(list(calc_dict[0].keys()), list(calc_dict[0].values()))
+    plt.plot(calc_dict[2], calc_dict[1], 'x')
     fig = plt.gcf()
     buf = io.BytesIO()
     fig.savefig(buf, format='png')
