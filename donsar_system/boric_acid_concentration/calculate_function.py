@@ -146,4 +146,4 @@ def calculator_handler(n0, t, h0, c0, tzap, block_id):
     # Раздел 5. Определение дельта С и Скрит
     delta_c = p_tot / (-dc)
     c_krit = c0 + delta_c
-    return c_krit, delta_c
+    return c_krit

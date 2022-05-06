@@ -1,17 +1,12 @@
 import base64
-import datetime
 import io
 import urllib.parse
-
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
-from .calculate_function import *
 from .forms import *
 from .models import *
 from .album_handler import *
-
-# Метод с использованием ModelForm
-from .water_exchange_function import critical_curve_calculator
+from .water_exchange_function import critical_curve_plotter
 
 
 def add_album_page(request):
@@ -52,41 +47,26 @@ def bor_calc_page(request):
             try:
                 block_id = int(request.POST['block'])
                 print(block_id)
-                # calculation_result = calculator_handler(form.cleaned_data['power_before_stop'],
-                #                                         form.cleaned_data['effective_days_worked'],
-                #                                         form.cleaned_data['rod_height_before_stop'],
-                #                                         form.cleaned_data['crit_conc_before_stop'],
-                #                                         form.cleaned_data['start_time'],
-                #                                         block_id)
-                calculation_result = critical_curve_calculator(form.cleaned_data['power_before_stop'],
-                                                               form.cleaned_data['effective_days_worked'],
-                                                               form.cleaned_data['rod_height_before_stop'],
-                                                               form.cleaned_data['crit_conc_before_stop'],
-                                                               form.cleaned_data['stop_time'],
-                                                               form.cleaned_data['start_time'],
-                                                               block_id,
-                                                               form.cleaned_data['stop_conc'])
+                critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
+                                                        form.cleaned_data['effective_days_worked'],
+                                                        form.cleaned_data['rod_height_before_stop'],
+                                                        form.cleaned_data['crit_conc_before_stop'],
+                                                        form.cleaned_data['stop_time'], form.cleaned_data['start_time'],
+                                                        block_id, form.cleaned_data['stop_conc'])
 
-                # result = [f'Целевая стартовая концентрация БК: {round(calculation_result[0], 3)}',
-                #           f'Необходимо изменить текущую концентрацию на {round(calculation_result[1], 3)}']
-                result = calculation_result
             except:
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
                 return (request, 'bor_calculator/bor_calc_page.html',
                         {'form': form, 'result': result})
-            # return render(request, 'bor_calculator/bor_calc_page.html',
-            #               {'form': form, 'result': result})
-            # return redirect('add_points')
-            print('!!!', (form.cleaned_data['start_time']-form.cleaned_data['stop_time']).seconds/60)
-            return add_points_page(request, calculation_result)
+            return add_points_page(request, critical_curve)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
-def add_points_page(request, calc_dict):
-    plt.plot(list(calc_dict[0].keys()), list(calc_dict[0].values()))
-    plt.plot(calc_dict[2], calc_dict[1], 'x')
+def add_points_page(request, curve_dict):
+    plt.plot(list(curve_dict[0].keys()), list(curve_dict[0].values()))
+    plt.plot(curve_dict[2], curve_dict[1], 'x')
     fig = plt.gcf()
     buf = io.BytesIO()
     fig.savefig(buf, format='png')
