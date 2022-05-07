@@ -68,6 +68,7 @@ def add_points_page(request, curve_dict):
     plt.plot(list(curve_dict[0].keys()), list(curve_dict[0].values()))
     plt.plot(curve_dict[2], curve_dict[1], 'x')
     fig = plt.gcf()
+    plt.savefig('graphs/График.png')
     buf = io.BytesIO()
     fig.savefig(buf, format='png')
     buf.seek(0)
@@ -81,4 +82,5 @@ def add_points_page(request, curve_dict):
                           {'title': 'Расчет концентрации БК', 'form': form})
     else:
         form = AddPointsForm()
-    return render(request, 'bor_calculator/add_points_page.html', {'title': 'Водообмен', 'form': form, 'graph': uri})
+    return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
+                                                                   'form': form, 'graph': uri})
