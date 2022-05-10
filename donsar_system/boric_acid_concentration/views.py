@@ -65,8 +65,9 @@ def bor_calc_page(request):
 
 
 def add_points_page(request, curve_dict):
-    plt.plot(list(curve_dict[0].keys()), list(curve_dict[0].values()), color='r' )
-    plt.plot(list(curve_dict[-2].keys()), list(curve_dict[-2].values()), '--')
+    # plt.plot(list(curve_dict[0].values()), '.', color='r')
+    plt.plot(list(curve_dict[0].keys()), list(curve_dict[0].values()), color='r')
+    plt.plot(list(curve_dict[-2].keys()), list(curve_dict[-2].values()))
     plt.plot(list(curve_dict[-1].keys()), list(curve_dict[-1].values()))
     # plt.plot(curve_dict[2], curve_dict[1], 'x')
 

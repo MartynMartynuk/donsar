@@ -39,22 +39,16 @@ def function2(table, h0):
     return float(table[key[7]][0].replace(',', '.')) - pp_inter
 
 
-def calculator_handler(n0, t, h0, c0, tzap, block_id):
-
-    table1 = Album.objects.get(title='table1', block_id=block_id).content
-    table2_start = Album.objects.get(title='table2_start', block_id=block_id).content
-    table2_100 = Album.objects.get(title='table2_100', block_id=block_id).content
-    table2_200 = Album.objects.get(title='table2_200', block_id=block_id).content
-    table2_300 = Album.objects.get(title='table2_300', block_id=block_id).content
-    table2_400 = Album.objects.get(title='table2_400', block_id=block_id).content
-    table2_500 = Album.objects.get(title='table2_500', block_id=block_id).content
-    table2_end = Album.objects.get(title='table2_end', block_id=block_id).content
-    table3 = Album.objects.get(title='table3', block_id=block_id).content
-    table4 = Album.objects.get(title='table4', block_id=block_id).content
-
-    # Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
-    # поиск эффекта реактивности из таблицы 5.9
-    row_keys = list(table1.keys())
+def temp_effect(n0, t, block_id):
+    """
+    Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
+    поиск эффекта реактивности из таблицы 5.9
+    :param n0: мощность до останова
+    :param t: проработано эффективных суток
+    :param block_id: файл альбома
+    """
+    table = Album.objects.get(title='table1', block_id=block_id).content
+    row_keys = list(table.keys())
     columns = [104, 100, 90, 80, 70, 60, 50, 40, 30]
     for i in range(2, 28):
         if int(row_keys[i]) > t:
@@ -64,86 +58,120 @@ def calculator_handler(n0, t, h0, c0, tzap, block_id):
     for j in range(0, 10):
         if int(columns[j]) == n0:
             break
-    p1_min = float(table1[row_keys[i - 1]][j].replace(',', '.'))
-    p1_max = float(table1[row_keys[i]][j].replace(',', '.'))
-    p1 = p1_min + (t - t_min) * (p1_max - p1_min) / (t_max - t_min)
+    p_min = float(table[row_keys[i - 1]][j].replace(',', '.'))
+    p_max = float(table[row_keys[i]][j].replace(',', '.'))
+    return p_min + (t - t_min) * (p_max - p_min) / (t_max - t_min)
 
-    # Раздел 2. Поиск эффекта реактивности за счет изменения положения 10й группы до 40%
+
+def group_effect(h0, t, block_id):
+    """
+    Раздел 2. Эффект реактивности за счет изменения положения 10й группы до 40%
+    :param h0: положение 10-й группы до останова
+    :param t: проработано эффективных суток
+    :param block_id: файл альбома
+    """
+    table_start = Album.objects.get(title='table2_start', block_id=block_id).content
+    table_100 = Album.objects.get(title='table2_100', block_id=block_id).content
+    table_200 = Album.objects.get(title='table2_200', block_id=block_id).content
+    table_300 = Album.objects.get(title='table2_300', block_id=block_id).content
+    table_400 = Album.objects.get(title='table2_400', block_id=block_id).content
+    table_500 = Album.objects.get(title='table2_500', block_id=block_id).content
+    table_end = Album.objects.get(title='table2_end', block_id=block_id).content
+
     if t < 100:
-        table21 = table2_start
-        table22 = table2_100
-        p2 = function1(table21, table22, h0, t, 0, 100)
+        table21 = table_start
+        table22 = table_100
+        p = function1(table21, table22, h0, t, 0, 100)
     elif t == 100:
-        table21 = table2_100
-        p2 = function2(table21, h0)
+        table21 = table_100
+        p = function2(table21, h0)
     elif 100 < t < 200:
-        table21 = table2_100
-        table22 = table2_200
-        p2 = function1(table21, table22, h0, t, 100, 200)
+        table21 = table_100
+        table22 = table_200
+        p = function1(table21, table22, h0, t, 100, 200)
     elif t == 200:
-        table21 = table2_200
-        p2 = function2(table21, h0)
+        table21 = table_200
+        p = function2(table21, h0)
     elif 200 < t < 300:
-        table21 = table2_200
-        table22 = table2_300
-        p2 = function1(table21, table22, h0, t, 200, 300)
+        table21 = table_200
+        table22 = table_300
+        p = function1(table21, table22, h0, t, 200, 300)
     elif t == 300:
-        table21 = table2_300
-        p2 = function2(table21, h0)
+        table21 = table_300
+        p = function2(table21, h0)
     elif 300 < t < 400:
-        table21 = table2_300
-        table22 = table2_400
-        p2 = function1(table21, table22, h0, t, 300, 400)
+        table21 = table_300
+        table22 = table_400
+        p = function1(table21, table22, h0, t, 300, 400)
     elif t == 400:
-        table21 = table2_400
-        p2 = function2(table21, h0)
+        table21 = table_400
+        p = function2(table21, h0)
     elif 400 < t < 500:
-        table21 = table2_400
-        table22 = table2_500
-        p2 = function1(table21, table22, h0, t, 400, 500)
+        table21 = table_400
+        table22 = table_500
+        p = function1(table21, table22, h0, t, 400, 500)
     elif t == 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
-        table21 = table2_500
-        p2 = function2(table21, h0)
-    elif t > 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
-        table21 = table2_500
-        table22 = table2_end
-        p2 = function1(table21, table22, h0, t, 500, 550)  # ?????-вопрос о большем времени
+        table21 = table_500
+        p = function2(table21, h0)
+    # elif t > 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
+    else:
+        table21 = table_500
+        table22 = table_end
+        p = function1(table21, table22, h0, t, 500, 550)  # ?????-вопрос о большем времени
+    return p
 
-    # Раздел 3. Эффект реактивности, вызванный ксеноном
-    key = list(table3.keys())
-    table3_column_names = [0, 100, 200, 300, 400, 500]
+
+def xe_effect(t, tzap, block_id):
+    """
+    Раздел 3. Эффект реактивности, вызванный ксеноном
+    :param t: проработано эффективных суток
+    :param tzap: время, прошедшее с останова
+    :param block_id: файл альбома
+    """
+    table = Album.objects.get(title='table3', block_id=block_id).content
+    key = list(table.keys())
+    table_column_names = [0, 100, 200, 300, 400, 500]
     for i in range(0, 73):
+        # переделать тут на интерполяцию
         if int(key[i]) == tzap:
             break
         elif tzap > 72:
             i = 72
 
     for j in range(0, 6):
-        if table3_column_names[j] > t:
-            t_max = table3_column_names[j]
-            t_min = table3_column_names[j-1]
+        if table_column_names[j] > t:
+            t_max = table_column_names[j]
+            t_min = table_column_names[j - 1]
             break
-    p3_min = float(table3[key[i]][j-1].replace(',', '.'))
-    p3_max = float(table3[key[i]][j].replace(',', '.'))
+    p_min = float(table[key[i]][j - 1].replace(',', '.'))
+    p_max = float(table[key[i]][j].replace(',', '.'))
 
-    p3 = p3_min + (t - t_min) * (p3_max - p3_min) / (t_max - t_min)
+    return p_min + (t - t_min) * (p_max - p_min) / (t_max - t_min)
 
-    # Раздел 3+. Общая реактивность
-    p_tot = p1 + p2 + p3
 
-    # Раздел 4. Эффективность БК
-    table4_key = list(table4.keys())
+def bor_efficiency(t, block_id):
+    """
+    Эффективность БК
+    :param t: проработано эффективных суток
+    :param block_id: файл альбома
+    """
+    table = Album.objects.get(title='table4', block_id=block_id).content
+    table_key = list(table.keys())
     for i in range(0, 27):
-        if float(table4_key[i].replace(',', '.')) > t:
-            table4_t_max = float(table4_key[i].replace(',', '.'))
-            table4_t_min = float(table4_key[i-1].replace(',', '.'))
+        if float(table_key[i].replace(',', '.')) > t:
+            table4_t_max = float(table_key[i].replace(',', '.'))
+            table4_t_min = float(table_key[i - 1].replace(',', '.'))
             break
+    dc_max = float(table[table_key[i]][11].replace(',', '.'))
+    dc_min = float(table[table_key[i - 1]][11].replace(',', '.'))
+    return dc_min + (t - table4_t_min) * (dc_max - dc_min) / (table4_t_max - table4_t_min)
 
-    dc_max = float(table4[table4_key[i]][11].replace(',', '.'))
-    dc_min = float(table4[table4_key[i-1]][11].replace(',', '.'))
-    dc = dc_min + (t - table4_t_min) * (dc_max - dc_min) / (table4_t_max - table4_t_min)
 
-    # Раздел 5. Определение дельта С и Скрит
-    delta_c = p_tot / (-dc)
-    c_krit = c0 + delta_c
-    return c_krit
+def conc_calc(p, c0, dc):
+    """
+    Определение критической концентрации БК
+    :param p: компенсируемый эффект реактивности
+    :param c0: начальная концентрация БК
+    :param dc: эффективность БК
+    """
+    return c0 + p / (-dc)
