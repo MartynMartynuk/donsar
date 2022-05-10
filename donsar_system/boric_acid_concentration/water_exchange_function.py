@@ -16,9 +16,13 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
     :param block_id: номер загрузки и блока (нужен для запуска вложенной функции)
     """
     # время завершения ксенонового процесса
+    # время запуска
     time_end = int(((start_time - stop_time).days * 24) + ((start_time - stop_time).seconds / 3600))
+    print(time_end)
+    time_end_minutes = time_end * 60
     crit_curve = {}
     setting_curve = {}
+    water_exchange_curve = {}
 
     max_crit_conc = calculator_handler(power_before_stop,
                                        effective_days_worked,
@@ -43,9 +47,23 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
                                                       current_time,
                                                       block_id)
 
-        setting_curve[current_time] =  crit_curve[current_time] + setting_width
+        setting_curve[current_time] = crit_curve[current_time] + setting_width
 
-    return crit_curve, stop_conc, time_end, setting_curve
+    for current_time in range(0, time_end * 2 + 1):
+        if current_time >= time_end:
+            water_exchange_curve[current_time] = water_exchange_calculator(stop_conc, 40, current_time-time_end)
+            if water_exchange_curve[current_time] <= setting_curve[current_time]:
+                break_time = current_time
+                water_exchange_curve[current_time+1] = water_exchange_curve[current_time]
+                break
+
+    for current_time in range(break_time+2, time_end*2+1):
+        water_exchange_curve[current_time] = water_exchange_calculator(water_exchange_curve[break_time+1], 10, current_time-time_end)
+        if water_exchange_curve[current_time] <= crit_curve[current_time]:
+            break
+
+    print(water_exchange_curve)
+    return crit_curve, stop_conc, time_end, setting_curve, water_exchange_curve
 
 
 def water_exchange_calculator(c_start, rate, time, po_pr=0.992, po=0.767, v=338):
@@ -61,14 +79,14 @@ def water_exchange_calculator(c_start, rate, time, po_pr=0.992, po=0.767, v=338)
     """
     return c_start * math.exp(-(rate * po_pr) / (po * v) * time)
 
-
-def water_exchange_plotter(start_time, stop_conc, aim_conc, rate):
-    """
-    Предоставление значений критической концентрации (от времени) для отрисовки кривой водообмена
-    :param aim_conc: целевая концентрация
-    :param start_time: время начала водообмена
-    :param stop_conc: начальная концентрация (стояночная)
-    """
-    param = True
-    while param:
-        water_exchange_calculator(stop_conc, rate)
+# def water_exchange_plotter(start_time, stop_conc, time_end, aim_conc, rate=40):
+#     """
+#     Предоставление значений критической концентрации (от времени) для отрисовки кривой водообмена
+#     :param aim_conc: целевая концентрация
+#     :param start_time: время начала водообмена
+#     :param stop_conc: начальная концентрация (стояночная)
+#     """
+#     # for current_time in range(0, time_end * 2 + 1):
+#
+#     while True:
+#         water_exchange_calculator(stop_conc, )
