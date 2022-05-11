@@ -47,7 +47,7 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
 
     for current_time in range(0, time_end+time_end//2):
         if current_time >= time_end:
-            water_exchange_curve[current_time] = water_exchange_calculator(stop_conc, 40, current_time - time_end)
+            water_exchange_curve[current_time] = water_exchange_calculator(stop_conc, 40, (current_time - time_end)/60)
             if water_exchange_curve[current_time] <= setting_curve[current_time]:
                 break_time = current_time
                 water_exchange_curve[current_time + 1] = water_exchange_curve[current_time]
@@ -55,7 +55,7 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
 
     for current_time in range(break_time + 2, time_end+time_end//2):
         water_exchange_curve[current_time] = water_exchange_calculator(water_exchange_curve[break_time + 1], 10,
-                                                                       current_time - time_end)
+                                                                       (current_time - time_end)/60)
         if water_exchange_curve[current_time] <= crit_curve[current_time]:
             break
 
