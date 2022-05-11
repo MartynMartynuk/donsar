@@ -40,16 +40,8 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
     for current_time in range(0, time_end+time_end//2):  # костыль, чтобы взять пошире на графике
         """ToDo переопределить до куда отрисовывать график"""
 
-        xe_effect_ = xe_effect(effective_days_worked, (current_time//60), block_id)
-        # crit_curve[current_time] = conc_calc(static_reactivity + xe_effect_, crit_conc_before_stop, bor_efficiency_)
+        xe_effect_ = xe_effect(effective_days_worked, (current_time/60), block_id)
         crit_curve[current_time] = crit_conc_before_stop + (static_reactivity + xe_effect_)/(-bor_efficiency_)
-        print(xe_effect_)
-        # crit_curve[current_time] = calculator_handler(power_before_stop,
-        #                                               effective_days_worked,
-        #                                               rod_height_before_stop,
-        #                                               crit_conc_before_stop,
-        #                                               current_time,
-        #                                               block_id)
 
         setting_curve[current_time] = crit_curve[current_time] + setting_width
 
@@ -67,8 +59,6 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
         if water_exchange_curve[current_time] <= crit_curve[current_time]:
             break
 
-    print(water_exchange_curve)
-    print(crit_curve)
     return crit_curve, stop_conc, time_end, setting_curve, water_exchange_curve
 
 
@@ -84,15 +74,3 @@ def water_exchange_calculator(c_start, rate, time, po_pr=0.992, po=0.767, v=338)
     :return: концентрация [г/дм3]
     """
     return c_start * math.exp(-(rate * po_pr) / (po * v) * time)
-
-# def water_exchange_plotter(start_time, stop_conc, time_end, aim_conc, rate=40):
-#     """
-#     Предоставление значений критической концентрации (от времени) для отрисовки кривой водообмена
-#     :param aim_conc: целевая концентрация
-#     :param start_time: время начала водообмена
-#     :param stop_conc: начальная концентрация (стояночная)
-#     """
-#     # for current_time in range(0, time_end * 2 + 1):
-#
-#     while True:
-#         water_exchange_calculator(stop_conc, )

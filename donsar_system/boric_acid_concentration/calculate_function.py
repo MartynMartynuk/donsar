@@ -1,4 +1,5 @@
 from boric_acid_concentration.models import Album
+from interpolation import linear_interpolate
 
 
 def function1(table1, table2, h0, t, min_day, max_day):  # x-меньшие сутки; y-большие сутки из названий таблиц
@@ -133,20 +134,27 @@ def xe_effect(t, tzap, block_id):
     table_column_names = [0, 100, 200, 300, 400, 500]
     for i in range(0, 73):
         # переделать тут на интерполяцию
-        if int(key[i]) == tzap:
-            break
-        elif tzap > 72:
+        if tzap >= 72:
             i = 72
-
+            break
+        elif i > tzap:
+            break
+    t_zap_list = [i - 1, i]
     for j in range(0, 6):
         if table_column_names[j] > t:
-            t_max = table_column_names[j]
-            t_min = table_column_names[j - 1]
+            t_list = [table_column_names[j-1], table_column_names[j]]
             break
-    p_min = float(table[key[i]][j - 1].replace(',', '.'))
-    p_max = float(table[key[i]][j].replace(',', '.'))
 
-    return p_min + (t - t_min) * (p_max - p_min) / (t_max - t_min)
+    p_min_tzap_lst = [float(table[key[i - 1]][j - 1].replace(',', '.')),
+                      float(table[key[i - 1]][j].replace(',', '.'))]
+    p_max_tzap_lst = [float(table[key[i]][j - 1].replace(',', '.')),
+                      float(table[key[i]][j].replace(',', '.'))]
+
+    p_tzap_iter = [linear_interpolate(t, t_list, p_min_tzap_lst),
+                   linear_interpolate(t, t_list, p_max_tzap_lst)]
+    print('###', tzap, t_zap_list)
+
+    return linear_interpolate(tzap, t_zap_list, p_tzap_iter)
 
 
 def bor_efficiency(t, block_id):

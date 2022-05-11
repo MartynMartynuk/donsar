@@ -2,8 +2,7 @@ import numpy as np
 
 
 def linear_interpolate(x, x_knot, y_knot):
-    ans = y_knot[0] + (x - x_knot[0]) * (y_knot[1] - y_knot[0]) / (x_knot[1] - x_knot[0])
-    return ans
+    return y_knot[0] + (x - x_knot[0]) * (y_knot[1] - y_knot[0]) / (x_knot[1] - x_knot[0])
 
 
 def lagrange(x, x_list, y_list):
