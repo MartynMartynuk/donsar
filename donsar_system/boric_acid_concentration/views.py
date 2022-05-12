@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
 from .album_handler import *
-from .water_exchange_function import critical_curve_plotter
+from .water_exchange_function import main_crit_handler
 
 
 def add_album_page(request):
@@ -47,12 +47,12 @@ def bor_calc_page(request):
             try:
                 block_id = int(request.POST['block'])
                 print(block_id)
-                critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
-                                                        form.cleaned_data['effective_days_worked'],
-                                                        form.cleaned_data['rod_height_before_stop'],
-                                                        form.cleaned_data['crit_conc_before_stop'],
-                                                        form.cleaned_data['stop_time'], form.cleaned_data['start_time'],
-                                                        block_id, form.cleaned_data['stop_conc'])
+                critical_curve = main_crit_handler(form.cleaned_data['power_before_stop'],
+                                                   form.cleaned_data['effective_days_worked'],
+                                                   form.cleaned_data['rod_height_before_stop'],
+                                                   form.cleaned_data['crit_conc_before_stop'],
+                                                   form.cleaned_data['stop_time'], form.cleaned_data['start_time'],
+                                                   block_id, form.cleaned_data['stop_conc'])
 
             except:
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
