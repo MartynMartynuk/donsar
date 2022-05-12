@@ -17,7 +17,8 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
     """
     # время завершения ксенонового процесса
     # время запуска
-    time_end = int(((start_time - stop_time).days * 1440) + ((start_time - stop_time).seconds / 60))
+    minutes_in_hour = 1440
+    time_end = int(((start_time - stop_time).days * minutes_in_hour) + ((start_time - stop_time).seconds / 60))
 
     crit_curve = {}
     setting_curve = {}
@@ -28,8 +29,16 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
 
     bor_efficiency_ = bor_efficiency(effective_days_worked, block_id)
 
-    max_crit_conc = 10
+    maximum_time = time_end + time_end // 2 + 1  # время, до которого рисуем кривые концентраций
 
+    for minute in range(0, maximum_time):
+        """ToDo переопределить до куда отрисовывать график"""
+
+        xe_effect_ = xe_effect(effective_days_worked, (minute / 60), block_id)
+        tot_reactivity = static_reactivity + xe_effect_
+        crit_curve[minute] = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
+
+    max_crit_conc = crit_curve[maximum_time - 1]
     if max_crit_conc < 7.0:
         setting_width = 1.3
     elif max_crit_conc > 10.4:
@@ -37,26 +46,24 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
     else:
         setting_width = 1.6
 
-    for current_time in range(0, time_end+time_end//2):  # костыль, чтобы взять пошире на графике
-        """ToDo переопределить до куда отрисовывать график"""
+    for minute in range(0, maximum_time):
+        setting_curve[minute] = crit_curve[minute] + setting_width
 
-        xe_effect_ = xe_effect(effective_days_worked, (current_time/60), block_id)
-        crit_curve[current_time] = crit_conc_before_stop + (static_reactivity + xe_effect_)/(-bor_efficiency_)
-
-        setting_curve[current_time] = crit_curve[current_time] + setting_width
-
-    for current_time in range(0, time_end+time_end//2):
-        if current_time >= time_end:
-            water_exchange_curve[current_time] = water_exchange_calculator(stop_conc, 40, (current_time - time_end)/60)
-            if water_exchange_curve[current_time] <= setting_curve[current_time]:
-                break_time = current_time
-                water_exchange_curve[current_time + 1] = water_exchange_curve[current_time]
+    for minute in range(0, maximum_time):
+        if minute >= time_end:
+            water_exchange_curve[minute] = water_exchange_calculator(stop_conc, 40, (minute - time_end) / 60)
+            if water_exchange_curve[minute] <= setting_curve[minute]:
+                start_break_time = minute
+                end_break_time = start_break_time + 61
                 break
 
-    for current_time in range(break_time + 2, time_end+time_end//2):
-        water_exchange_curve[current_time] = water_exchange_calculator(water_exchange_curve[break_time + 1], 10,
-                                                                       (current_time - time_end)/60)
-        if water_exchange_curve[current_time] <= crit_curve[current_time]:
+    for minute in range(start_break_time+1, end_break_time):
+        water_exchange_curve[minute] = water_exchange_curve[start_break_time]
+
+    for minute in range(end_break_time+1, maximum_time):
+        water_exchange_curve[minute] = water_exchange_calculator(water_exchange_curve[start_break_time],
+                                                                 10, (minute - end_break_time) / 60)
+        if water_exchange_curve[minute] <= crit_curve[minute]:
             break
 
     return crit_curve, stop_conc, time_end, setting_curve, water_exchange_curve

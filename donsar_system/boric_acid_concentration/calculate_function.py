@@ -152,7 +152,6 @@ def xe_effect(t, tzap, block_id):
 
     p_tzap_iter = [linear_interpolate(t, t_list, p_min_tzap_lst),
                    linear_interpolate(t, t_list, p_max_tzap_lst)]
-    print('###', tzap, t_zap_list)
 
     return linear_interpolate(tzap, t_zap_list, p_tzap_iter)
 
