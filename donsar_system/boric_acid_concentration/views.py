@@ -120,6 +120,7 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     plt.grid(which='major', linewidth=0.5)
     plt.grid(which='minor', linestyle=':')
     plt.legend(loc='upper right', shadow=False, fontsize=9)
+    # plt.set_yticklabels(list(crit_curve_dict.keys()), rotation=90, verticalaligment='center')
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
     plt.xlim((start_time - 200, water_exchange_end_time + 200))
