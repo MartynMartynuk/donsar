@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
 from .album_handler import *
-from .water_exchange_function import main_crit_handler
+from .water_exchange_function import *
 
 
 def add_album_page(request):
@@ -46,30 +46,40 @@ def bor_calc_page(request):
         if form.is_valid():
             try:
                 block_id = int(request.POST['block'])
-                print(block_id)
-                critical_curve = main_crit_handler(form.cleaned_data['power_before_stop'],
-                                                   form.cleaned_data['effective_days_worked'],
-                                                   form.cleaned_data['rod_height_before_stop'],
-                                                   form.cleaned_data['crit_conc_before_stop'],
-                                                   form.cleaned_data['stop_time'], form.cleaned_data['start_time'],
-                                                   block_id, form.cleaned_data['stop_conc'])
+                # print(block_id)
+
+                minutes_in_hour = 1440
+                start_time = int(
+                    ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).days * minutes_in_hour) +
+                    ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).seconds / 60))
+                maximum_time = start_time + start_time // 2 + 1  # время, до которого рисуем кривые концентраций
+
+                critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
+                                                        form.cleaned_data['effective_days_worked'],
+                                                        form.cleaned_data['rod_height_before_stop'],
+                                                        form.cleaned_data['crit_conc_before_stop'],
+                                                        maximum_time,
+                                                        block_id)
+
+                setting_curve = setting_curve_plotter(maximum_time, critical_curve)
+
+                water_exchange_curve = water_exchange_plotter(start_time, maximum_time, form.cleaned_data['stop_conc'],
+                                                              critical_curve, setting_curve)
 
             except:
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
                 return (request, 'bor_calculator/bor_calc_page.html',
                         {'form': form, 'result': result})
-            return add_points_page(request, critical_curve)
+            return add_points_page(request, critical_curve, setting_curve, water_exchange_curve)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
-def add_points_page(request, curve_dict):
-    # plt.plot(list(curve_dict[0].values()), '.', color='r')
-    plt.plot(list(curve_dict[0].keys()), list(curve_dict[0].values()), color='r')
-    plt.plot(list(curve_dict[-2].keys()), list(curve_dict[-2].values()))
-    plt.plot(list(curve_dict[-1].keys()), list(curve_dict[-1].values()))
-    # plt.plot(curve_dict[2], curve_dict[1], 'x')
+def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict):
+    plt.plot(list(crit_curve_dict.keys()), list(crit_curve_dict.values()), color='r')
+    plt.plot(list(setting_dict.keys()), list(setting_dict.values()), color='b')
+    plt.plot(list(water_exchange_dict.keys()), list(water_exchange_dict.values()), color='g')
 
     fig = plt.gcf()
     plt.savefig('graphs/График.png')
