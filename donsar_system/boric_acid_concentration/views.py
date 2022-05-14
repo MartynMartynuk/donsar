@@ -10,6 +10,10 @@ from .water_exchange_function import *
 
 
 def add_album_page(request):
+    """
+    Страница добавления альбома
+    :param request:
+    """
     if request.method == 'POST':
         form = AddAlbumForm(request.POST, request.FILES)
         if form.is_valid():
@@ -41,6 +45,11 @@ def add_album_page(request):
 
 
 def bor_calc_page(request):
+    """
+    Страница формы
+    :param request:
+    :return:
+    """
     if request.method == 'POST':
         form = BorCalcForm(request.POST)
         if form.is_valid():
@@ -52,6 +61,7 @@ def bor_calc_page(request):
                 start_time = int(
                     ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).days * minutes_in_hour) +
                     ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).seconds / 60))
+                stop_conc = form.cleaned_data['stop_conc']
                 maximum_time = start_time + start_time // 2 + 1  # время, до которого рисуем кривые концентраций
 
                 critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
@@ -70,16 +80,50 @@ def bor_calc_page(request):
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
                 return (request, 'bor_calculator/bor_calc_page.html',
                         {'form': form, 'result': result})
-            return add_points_page(request, critical_curve, setting_curve, water_exchange_curve)
+            return add_points_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
-def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict):
-    plt.plot(list(crit_curve_dict.keys()), list(crit_curve_dict.values()), color='r')
-    plt.plot(list(setting_dict.keys()), list(setting_dict.values()), color='b')
-    plt.plot(list(water_exchange_dict.keys()), list(water_exchange_dict.values()), color='g')
+def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc):
+    """
+    Страница вывода графика и добавления точек экспериментальной кривой водообмена
+    :param request:
+    :param crit_curve_dict: словарь критических концентраций (время: значение)
+    :param setting_dict: словарь уставочных концентраций (время: значение)
+    :param water_exchange_dict: словарь концентраций водообмена (время: значение)
+    :param stop_conc: стояночная концентрация БК
+    :param start_time: время начала водообмена
+    :return:
+    """
+    plt.plot(list(crit_curve_dict.keys()),
+             list(crit_curve_dict.values()),
+             color='r',
+             label='Критическая концентрация',
+             linewidth=1)
+    plt.plot(list(setting_dict.keys()),
+             list(setting_dict.values()),
+             color='b',
+             label='Уставочная концентрация',
+             linewidth=1)
+    plt.plot(list(water_exchange_dict.keys()),
+             list(water_exchange_dict.values()),
+             color='g',
+             label='Концентрация водообмена',
+             # marker='x',
+             linewidth=1)
+
+    plt.xlabel('Время, мин')
+    plt.ylabel(r'Концентрация БК, г/$дм^{3}$')
+    plt.minorticks_on()
+    plt.grid(which='major', linewidth=0.5)
+    plt.grid(which='minor', linestyle=':')
+    plt.legend(loc='upper right', shadow=False, fontsize=9)
+
+    water_exchange_end_time = len(water_exchange_dict) + start_time
+    plt.xlim((start_time - 200, water_exchange_end_time + 200))
+    plt.ylim((water_exchange_dict[water_exchange_end_time - 1] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()
     plt.savefig('graphs/График.png')
