@@ -3,7 +3,7 @@ from boric_acid_concentration.calculate_function import *
 
 
 def main_crit_handler(power_before_stop, effective_days_worked, rod_height_before_stop,
-                           crit_conc_before_stop, stop_time, start_time, block_id, stop_conc):
+                      crit_conc_before_stop, stop_time, start_time, block_id, stop_conc):
     """
     Предоставление значений критической концентрации (от времени) для отрисовки кривой
     :param power_before_stop: мощность реактора до останова
@@ -31,10 +31,11 @@ def main_crit_handler(power_before_stop, effective_days_worked, rod_height_befor
 
     maximum_time = time_end + time_end // 2 + 1  # время, до которого рисуем кривые концентраций
 
+    xenon_table = Album.objects.get(title='table3', block_id=block_id).content
     for minute in range(0, maximum_time):
         """ToDo переопределить до куда отрисовывать график"""
 
-        xe_effect_ = xe_effect(effective_days_worked, (minute / 60), block_id)
+        xe_effect_ = xe_effect(effective_days_worked, (minute / 60), block_id, xenon_table)
         tot_reactivity = static_reactivity + xe_effect_
         crit_curve[minute] = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
 
@@ -57,10 +58,10 @@ def main_crit_handler(power_before_stop, effective_days_worked, rod_height_befor
                 end_break_time = start_break_time + 61
                 break
 
-    for minute in range(start_break_time+1, end_break_time):
+    for minute in range(start_break_time + 1, end_break_time):
         water_exchange_curve[minute] = water_exchange_curve[start_break_time]
 
-    for minute in range(end_break_time+1, maximum_time):
+    for minute in range(end_break_time + 1, maximum_time):
         water_exchange_curve[minute] = water_exchange_calculator(water_exchange_curve[start_break_time],
                                                                  10, (minute - end_break_time) / 60)
         if water_exchange_curve[minute] <= crit_curve[minute]:

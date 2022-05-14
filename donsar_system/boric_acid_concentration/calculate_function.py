@@ -122,14 +122,14 @@ def group_effect(h0, t, block_id):
     return p
 
 
-def xe_effect(t, tzap, block_id):
+def xe_effect(t, tzap, block_id, table):
     """
     Раздел 3. Эффект реактивности, вызванный ксеноном
     :param t: проработано эффективных суток
     :param tzap: время, прошедшее с останова
     :param block_id: файл альбома
     """
-    table = Album.objects.get(title='table3', block_id=block_id).content
+    # table = Album.objects.get(title='table3', block_id=block_id).content
     key = list(table.keys())
     table_column_names = [0, 100, 200, 300, 400, 500]
     for i in range(0, 73):
