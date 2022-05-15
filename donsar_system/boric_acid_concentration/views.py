@@ -1,5 +1,7 @@
 import base64
+import datetime
 import io
+import time
 import urllib.parse
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
@@ -76,17 +78,25 @@ def bor_calc_page(request):
                 water_exchange_curve = water_exchange_plotter(start_time, maximum_time, form.cleaned_data['stop_conc'],
                                                               critical_curve, setting_curve)
 
+                datetime_crit_axis = []
+                datetime_water_exchange_axis = []
+                for i in list(critical_curve.keys()):
+                    datetime_crit_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
+                for i in list(water_exchange_curve.keys()):
+                    datetime_water_exchange_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
             except:
                 result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
                 return (request, 'bor_calculator/bor_calc_page.html',
                         {'form': form, 'result': result})
-            return add_points_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc)
+            return add_points_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
+                                   datetime_crit_axis, datetime_water_exchange_axis)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
-def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc):
+def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
+                    water_exchange_axis):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
     :param request:
@@ -95,19 +105,32 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     :param water_exchange_dict: словарь концентраций водообмена (время: значение)
     :param stop_conc: стояночная концентрация БК
     :param start_time: время начала водообмена
+    :param crit_axis: ось абсцисс формата datatime (длинная)
+    :param water_exchange_axis: ось абсцисс формата datatime (короткая)
     :return:
     """
-    plt.plot(list(crit_curve_dict.keys()),
+    crit_axis_str = ['25.04.22:10:00', '25.04.22 11:00', '25.04.22 12:00', '25.04.22 13:00',
+                     '25.04.22 14:00', '25.04.22 15:00', '25.04.22 16:00', '25.04.22 17:00']
+    # water_exchange_axis_str = []
+    # for i in crit_axis:
+    #     crit_axis_str.append(datetime.datetime.strftime(i, '%d.%m.%Y %H:%M'))
+    # for i in water_exchange_axis:
+    #     water_exchange_axis_str.append(datetime.datetime.strftime(i, '%d.%m.%Y %H:%M'))
+    # print(crit_axis_str, water_exchange_axis_str)
+    # print('!!!!')
+
+    fig, ax = plt.subplots()
+    plt.plot(crit_axis,
              list(crit_curve_dict.values()),
              color='r',
              label='Критическая концентрация',
              linewidth=1)
-    plt.plot(list(setting_dict.keys()),
+    plt.plot(crit_axis,
              list(setting_dict.values()),
              color='b',
              label='Уставочная концентрация',
              linewidth=1)
-    plt.plot(list(water_exchange_dict.keys()),
+    plt.plot(water_exchange_axis,
              list(water_exchange_dict.values()),
              color='g',
              label='Концентрация водообмена',
@@ -120,10 +143,13 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     plt.grid(which='major', linewidth=0.5)
     plt.grid(which='minor', linestyle=':')
     plt.legend(loc='upper right', shadow=False, fontsize=9)
-    # plt.set_yticklabels(list(crit_curve_dict.keys()), rotation=90, verticalaligment='center')
+
+    ax.set_xticklabels(crit_axis_str)
+    plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
-    plt.xlim((start_time - 200, water_exchange_end_time + 200))
+    plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
+             water_exchange_axis[-1]+datetime.timedelta(hours=1))
     plt.ylim((water_exchange_dict[water_exchange_end_time - 1] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()
