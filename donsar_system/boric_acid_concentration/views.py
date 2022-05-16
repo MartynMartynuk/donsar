@@ -109,7 +109,7 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     :param water_exchange_axis: ось абсцисс формата datatime (короткая)
     :return:
     """
-    crit_axis_str = ['25.04.22:10:00', '25.04.22 11:00', '25.04.22 12:00', '25.04.22 13:00',
+    crit_axis_str = ['25.04.22\n10:00', '25.04.22 11:00', '25.04.22 12:00', '25.04.22 13:00',
                      '25.04.22 14:00', '25.04.22 15:00', '25.04.22 16:00', '25.04.22 17:00']
     # water_exchange_axis_str = []
     # for i in crit_axis:
@@ -123,17 +123,17 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     plt.plot(crit_axis,
              list(crit_curve_dict.values()),
              color='r',
-             label='Критическая концентрация',
+             label='Критическая концентрация БК',
              linewidth=1)
     plt.plot(crit_axis,
              list(setting_dict.values()),
              color='b',
-             label='Уставочная концентрация',
+             label='Начало пускового диапазона',
              linewidth=1)
     plt.plot(water_exchange_axis,
              list(water_exchange_dict.values()),
              color='g',
-             label='Концентрация водообмена',
+             label='Концентрация БК при водообмене',
              # marker='x',
              linewidth=1)
 
