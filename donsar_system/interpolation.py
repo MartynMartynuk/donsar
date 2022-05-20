@@ -1,7 +1,11 @@
 import numpy as np
 
 
-def linear_interpolate(x, x_knot, y_knot):
+def linear_interpolate(x, x_min, x_max, y_min, y_max):
+    return y_min + (x - x_min) * (y_max - y_min) / (x_max - x_min)
+
+
+def linear_interpolate_list(x, x_knot, y_knot):
     return y_knot[0] + (x - x_knot[0]) * (y_knot[1] - y_knot[0]) / (x_knot[1] - x_knot[0])
 
 

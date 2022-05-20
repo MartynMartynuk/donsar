@@ -1,43 +1,84 @@
 from boric_acid_concentration.models import Album
-from interpolation import linear_interpolate
+from interpolation import *
 
 
-def function1(table1, table2, h0, t, min_day, max_day):  # x-меньшие сутки; y-большие сутки из названий таблиц
-    key = list(table1.keys())
-    for i in range(0, 12):
-        if int(key[i]) < h0:
-            h1_min = int(key[i])
-            h1_max = int(key[i - 1])
-            break
-    pp1_min = float(table1[key[i]][0].replace(',', '.'))
-    pp1_max = float(table1[key[i - 1]][0].replace(',', '.'))
-    pp1_inter = pp1_min + (h0 - h1_min) * (pp1_max - pp1_min) / (h1_max - h1_min)
-    p1 = float(table1[key[7]][0].replace(',', '.')) - pp1_inter
+# def function1(table1, table2, h0, t, min_day, max_day):  # x-меньшие сутки; y-большие сутки из названий таблиц
+#     key = list(table1.keys())
+#     for i in range(0, 12):
+#         if int(key[i]) < h0:
+#             h1_min = int(key[i])
+#             h1_max = int(key[i - 1])
+#             break
+#     pp1_min = float(table1[key[i]][0].replace(',', '.'))
+#     pp1_max = float(table1[key[i - 1]][0].replace(',', '.'))
+#     pp1_inter = pp1_min + (h0 - h1_min) * (pp1_max - pp1_min) / (h1_max - h1_min)
+#     p1 = float(table1[key[7]][0].replace(',', '.')) - pp1_inter
+#
+#     for i in range(0, 12):
+#         if int(key[i]) < h0:
+#             h2_min = int(key[i])
+#             h2_max = int(key[i - 1])
+#             break
+#     pp2_min = float(table2[key[i]][0].replace(',', '.'))
+#     pp2_max = float(table2[key[i - 1]][0].replace(',', '.'))
+#     pp2_inter = pp2_min + (h0 - h2_min) * (pp2_max - pp2_min) / (h2_max - h2_min)
+#     p2 = float(table2[key[7]][0].replace(',', '.')) - pp2_inter
+#
+#     return p1 + (t - min_day) * (p2 - p1) / (max_day - min_day)
+#
+#
+# def function2(table, h0):
+#     key = list(table.keys())
+#     for i in range(1, 12):
+#         if int(key[i]) < h0:
+#             h_min = int(key[i])
+#             h_max = int(key[i-1])
+#             break
+#     pp_min = float(table[key[i]][0].replace(',', '.'))
+#     pp_max = float(table[key[i-1]][0].replace(',', '.'))
+#     pp_inter = pp_min + (h0 - h_min) * (pp_max - pp_min) / (h_max - h_min)
+#     return float(table[key[7]][0].replace(',', '.')) - pp_inter
 
-    for i in range(0, 12):
-        if int(key[i]) < h0:
-            h2_min = int(key[i])
-            h2_max = int(key[i - 1])
-            break
-    pp2_min = float(table2[key[i]][0].replace(',', '.'))
-    pp2_max = float(table2[key[i - 1]][0].replace(',', '.'))
-    pp2_inter = pp2_min + (h0 - h2_min) * (pp2_max - pp2_min) / (h2_max - h2_min)
-    p2 = float(table2[key[7]][0].replace(',', '.')) - pp2_inter
 
-    return p1 + (t - min_day) * (p2 - p1) / (max_day - min_day)
+def get_range(wide_range, mean):
+    """
+    Поиск ближайших минимального и минимального значений для интерполяции
+    :param mean: величина, значение для которой ищем
+    :param wide_range: полный диапазон значений
+    :return: кортеж с ближайшими минимальным и максимальным значениями
+    """
+    for i in range(1, len(wide_range) + 1):
+        if int(wide_range[i]) < mean:
+            return int(wide_range[i]), int(wide_range[i - 1]), i  # (min, max, i)
 
 
-def function2(table, h0):
-    key = list(table.keys())
-    for i in range(1, 12):
-        if int(key[i]) < h0:
-            h_min = int(key[i])
-            h_max = int(key[i-1])
-            break
-    pp_min = float(table[key[i]][0].replace(',', '.'))
-    pp_max = float(table[key[i-1]][0].replace(',', '.'))
-    pp_inter = pp_min + (h0 - h_min) * (pp_max - pp_min) / (h_max - h_min)
-    return float(table[key[7]][0].replace(',', '.')) - pp_inter
+def suz_effect_short(table, h_0):
+    """
+    Расчет эффекта реактивности от движения 10-й гр. СУЗ
+    :param table: таблица (словарь)
+    :param h_0: высота 10-й гр. до останова
+    """
+    keys = list(table.keys())
+    h_min, h_max, i = get_range(keys, h_0)
+    p_min = float(table[keys[i]][0].replace(',', '.'))
+    p_max = float(table[keys[i - 1]][0].replace(',', '.'))
+    p_iter = linear_interpolate(h_0, h_min, h_max, p_min, p_max)
+    return float(table[keys[7]][0].replace(',', '.')) - p_iter
+
+
+def suz_effect_long(table1, table2, h_0, t, min_day, max_day):
+    """
+    Расчет эффекта реактивности от движения 10-й гр. СУЗ (для 2-х таблиц)
+    :param table1: таблица меньшего времени (словарь)
+    :param table2: таблица большего времени (словарь)
+    :param h_0: высота 10-й гр. до останова
+    :param t: сутки останова
+    :param min_day: меньшие сутки из названий таблиц
+    :param max_day: большие сутки из названий таблиц
+    """
+    p_1 = suz_effect_short(table1, h_0)
+    p_2 = suz_effect_short(table2, h_0)
+    return linear_interpolate(t, min_day, max_day, p_2, p_1)
 
 
 def temp_effect(n0, t, block_id):
@@ -64,6 +105,10 @@ def temp_effect(n0, t, block_id):
     return p_min + (t - t_min) * (p_max - p_min) / (t_max - t_min)
 
 
+# def temp_eff(n_0, t, block_id):
+#     table = Album.objects.get(title='table1', block_id=block_id).content
+
+
 def group_effect(h0, t, block_id):
     """
     Раздел 2. Эффект реактивности за счет изменения положения 10й группы до 40%
@@ -80,45 +125,28 @@ def group_effect(h0, t, block_id):
     table_end = Album.objects.get(title='table2_end', block_id=block_id).content
 
     if t < 100:
-        table21 = table_start
-        table22 = table_100
-        p = function1(table21, table22, h0, t, 0, 100)
+        p = suz_effect_long(table_start, table_100, h0, t, 0, 100)
     elif t == 100:
-        table21 = table_100
-        p = function2(table21, h0)
+        p = suz_effect_short(table_100, h0)
     elif 100 < t < 200:
-        table21 = table_100
-        table22 = table_200
-        p = function1(table21, table22, h0, t, 100, 200)
+        p = suz_effect_long(table_100, table_200, h0, t, 100, 200)
     elif t == 200:
-        table21 = table_200
-        p = function2(table21, h0)
+        p = suz_effect_short(table_200, h0)
     elif 200 < t < 300:
-        table21 = table_200
-        table22 = table_300
-        p = function1(table21, table22, h0, t, 200, 300)
+        p = suz_effect_long(table_200, table_300, h0, t, 200, 300)
     elif t == 300:
-        table21 = table_300
-        p = function2(table21, h0)
+        p = suz_effect_short(table_300, h0)
     elif 300 < t < 400:
-        table21 = table_300
-        table22 = table_400
-        p = function1(table21, table22, h0, t, 300, 400)
+        p = suz_effect_long(table_300, table_400, h0, t, 300, 400)
     elif t == 400:
-        table21 = table_400
-        p = function2(table21, h0)
+        p = suz_effect_short(table_400, h0)
     elif 400 < t < 500:
-        table21 = table_400
-        table22 = table_500
-        p = function1(table21, table22, h0, t, 400, 500)
+        p = suz_effect_long(table_400, table_500, h0, t, 400, 500)
     elif t == 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
-        table21 = table_500
-        p = function2(table21, h0)
+        p = suz_effect_short(table_500, h0)
     # elif t > 500:  # не срабатывает, надо писать доп условия во всех циклах, пока поставил заглушку в форме
     else:
-        table21 = table_500
-        table22 = table_end
-        p = function1(table21, table22, h0, t, 500, 550)  # ?????-вопрос о большем времени
+        p = suz_effect_long(table_500, table_end, h0, t, 500, 550)  # ?????-вопрос о большем времени
     return p
 
 
@@ -133,7 +161,6 @@ def xe_effect(t, tzap, block_id, table):
     key = list(table.keys())
     table_column_names = [0, 100, 200, 300, 400, 500]
     for i in range(0, 73):
-        # переделать тут на интерполяцию
         if tzap >= 72:
             i = 72
             break
@@ -142,7 +169,7 @@ def xe_effect(t, tzap, block_id, table):
     t_zap_list = [i - 1, i]
     for j in range(0, 6):
         if table_column_names[j] > t:
-            t_list = [table_column_names[j-1], table_column_names[j]]
+            t_list = [table_column_names[j - 1], table_column_names[j]]
             break
 
     p_min_tzap_lst = [float(table[key[i - 1]][j - 1].replace(',', '.')),
@@ -150,10 +177,10 @@ def xe_effect(t, tzap, block_id, table):
     p_max_tzap_lst = [float(table[key[i]][j - 1].replace(',', '.')),
                       float(table[key[i]][j].replace(',', '.'))]
 
-    p_tzap_iter = [linear_interpolate(t, t_list, p_min_tzap_lst),
-                   linear_interpolate(t, t_list, p_max_tzap_lst)]
+    p_tzap_iter = [linear_interpolate_list(t, t_list, p_min_tzap_lst),
+                   linear_interpolate_list(t, t_list, p_max_tzap_lst)]
 
-    return linear_interpolate(tzap, t_zap_list, p_tzap_iter)
+    return linear_interpolate_list(tzap, t_zap_list, p_tzap_iter)
 
 
 def bor_efficiency(t, block_id):
