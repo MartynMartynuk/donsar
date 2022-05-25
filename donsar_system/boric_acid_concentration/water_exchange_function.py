@@ -24,7 +24,8 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
     xenon_table = Album.objects.get(title='table3', block_id=block_id).content
 
     for minute in range(0, maximum_time):
-        xe_effect_ = xe_effect(effective_days_worked, (minute / 60), block_id, xenon_table)
+        xe_effect_ = xe_effect(effective_days_worked, (minute / 60), xenon_table)
+        # print('!@#', xe_effect_, minute, maximum_time)
         tot_reactivity = static_reactivity + xe_effect_
         crit_curve[minute] = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
     return crit_curve

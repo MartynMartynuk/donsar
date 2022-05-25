@@ -148,9 +148,9 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
-    plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
-             water_exchange_axis[-1]+datetime.timedelta(hours=1))
-    plt.ylim((water_exchange_dict[water_exchange_end_time - 1] - 0.5, stop_conc + 0.1))
+    # plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
+    #          water_exchange_axis[-1]+datetime.timedelta(hours=1))
+    # plt.ylim((water_exchange_dict[water_exchange_end_time - 1] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()
     plt.savefig('graphs/График.png')
