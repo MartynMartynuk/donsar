@@ -14,11 +14,11 @@ def get_range(wide_range, mean, compare=1, int_=True):
     if int_ is True:
         if compare == 1:
             for i in range(0, len(wide_range) + 1):
-                if int(wide_range[i]) < mean:
+                if int(wide_range[i]) <= mean:
                     return int(wide_range[i]), int(wide_range[i-1]), i  # (min, max, i)
         elif compare == 2:
             for i in range(0, len(wide_range) + 1):
-                if int(wide_range[i]) > mean:
+                if int(wide_range[i]) >= mean:
                     return int(wide_range[i-1]), int(wide_range[i]), i  # (min, max, i)
         else:
             for i in range(0, len(wide_range) + 1):
@@ -26,7 +26,6 @@ def get_range(wide_range, mean, compare=1, int_=True):
                     return i
     else:
         for i in range(0, len(wide_range) + 1):
-            print(wide_range[i], mean)
             if float(wide_range[i].replace(',', '.')) > mean:
                 return float(wide_range[i].replace(',', '.')), float(wide_range[i - 1].replace(',', '.')), i  # (min, max, i)
 
@@ -135,7 +134,7 @@ def xe_effect(t, t_zap, table):
         i = 72
         p_min_day = float(table[time[i]][j - 1].replace(',', '.'))
         p_max_day = float(table[time[i]][j].replace(',', '.'))
-        return linear_interpolate(t_zap, day_min, day_max, p_min_day, p_max_day)
+        return linear_interpolate(t, day_min, day_max, p_min_day, p_max_day)
     else:
         t_zap_min, t_zap_max, i = get_range(time, t_zap, compare=2)
 
@@ -159,7 +158,6 @@ def bor_efficiency(t, block_id):
     table = Album.objects.get(title='table4', block_id=block_id).content
     days = list(table.keys())
     day_min, day_max, i = get_range(days, t, int_=False)
-    print(day_min, day_max, i)
     dc_max = float(table[days[i]][11].replace(',', '.'))
     dc_min = float(table[days[i - 1]][11].replace(',', '.'))
     return linear_interpolate(t, day_min, day_max, dc_min, dc_max)
