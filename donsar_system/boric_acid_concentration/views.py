@@ -53,7 +53,8 @@ def add_points(request):
 
         if form.is_valid():
             print('!!@1234')
-            return redirect('graph')
+            # return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
+            #                   datetime_crit_axis, datetime_water_exchange_axis)
     else:
         form = AddPointsForm()
     return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
@@ -70,6 +71,15 @@ def bor_calc_page(request):
         form = BorCalcForm(request.POST)
         if form.is_valid():
             block_id = int(request.POST['block'])
+
+            CalculationResult.objects.create(power_before_stop=form.cleaned_data['power_before_stop'],
+                                             effective_days_worked=form.cleaned_data['effective_days_worked'],
+                                             rod_height_before_stop=form.cleaned_data['rod_height_before_stop'],
+                                             crit_conc_before_stop=form.cleaned_data['crit_conc_before_stop'],
+                                             stop_time=form.cleaned_data['stop_time'],
+                                             start_time=form.cleaned_data['start_time'],
+                                             stop_conc=form.cleaned_data['stop_conc'])
+
 
             exp_exchange_curve = {}
 
@@ -98,7 +108,6 @@ def bor_calc_page(request):
                 datetime_crit_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
             for i in list(water_exchange_curve.keys()):
                 datetime_water_exchange_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
-
             return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
                               datetime_crit_axis, datetime_water_exchange_axis)
     else:
