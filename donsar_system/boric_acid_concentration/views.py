@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
 from .album_handler import *
+from .views_handler import get_start_time, get_maximum_time
 from .water_exchange_function import *
 
 
@@ -80,15 +81,10 @@ def bor_calc_page(request):
                                              start_time=form.cleaned_data['start_time'],
                                              stop_conc=form.cleaned_data['stop_conc'])
 
-
-            exp_exchange_curve = {}
-
-            minutes_in_hour = 1440
-            start_time = int(
-                ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).days * minutes_in_hour) +
-                ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).seconds / 60))
+            start_time = get_start_time(form.cleaned_data['start_time'], form.cleaned_data['stop_time'])
             stop_conc = form.cleaned_data['stop_conc']
-            maximum_time = start_time + start_time // 2 + 1  # время, до которого рисуем кривые концентраций
+
+            maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
 
             critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
                                                     form.cleaned_data['effective_days_worked'],
