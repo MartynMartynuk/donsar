@@ -15,17 +15,3 @@ class Block(models.Model):
 
     def __str__(self):
         return f'Блок {self.block_number} загрузка {self.batch_number}'
-
-
-# Отвязал форму расчета от модели, модель закоментил, т.к. не взаимодействует с БД
-# Если надо вывод, смотри views
-# class BorCalculator(models.Model):
-#     """ Выполняет расчет концентрации БК по полученным данным """
-#
-#     power_before_stop = models.IntegerField(verbose_name='Мощность ЯР до остановки (% от Nном)')
-#     effective_days_worked = models.IntegerField(verbose_name='Число отработанных эффективных суток')
-#     rod_height_before_stop = models.IntegerField(verbose_name='Подъем стержней до останова (%)')
-#     crit_conc_before_stop = models.FloatField(verbose_name='Критическая концентрация БК до останова')
-#     start_time = models.FloatField(verbose_name='Время, через которое '
-#                                                 'будет осуществляться запуск (часов)')
-#     block = models.ForeignKey('Block', on_delete=PROTECT, null=True, verbose_name='Блок и загрузка')

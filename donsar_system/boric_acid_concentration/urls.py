@@ -19,5 +19,6 @@ from django.urls import path
 urlpatterns = [
     path('', views.bor_calc_page, name='bor_calc'),
     path('add/', views.add_album_page, name='add_album'),
-    path('add_points/', views.add_points_page, name='add_points')
+    path('graph/', views.graph_page, name='graph'),
+    path('add_points/', views.add_points, name='add_points')
 ]

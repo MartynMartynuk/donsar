@@ -46,6 +46,20 @@ def add_album_page(request):
     return render(request, 'bor_calculator/album_upload_page.html', {'title': 'Добавление альбома', 'form': form})
 
 
+def add_points(request):
+    if request.method == 'POST':
+        form = AddPointsForm(request.POST)
+        print('!!@123')
+
+        if form.is_valid():
+            print('!!@1234')
+            return redirect('graph')
+    else:
+        form = AddPointsForm()
+    return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
+                                                                   'form': form})
+
+
 def bor_calc_page(request):
     """
     Страница формы
@@ -55,48 +69,45 @@ def bor_calc_page(request):
     if request.method == 'POST':
         form = BorCalcForm(request.POST)
         if form.is_valid():
-            try:
-                block_id = int(request.POST['block'])
-                # print(block_id)
+            block_id = int(request.POST['block'])
 
-                minutes_in_hour = 1440
-                start_time = int(
-                    ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).days * minutes_in_hour) +
-                    ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).seconds / 60))
-                stop_conc = form.cleaned_data['stop_conc']
-                maximum_time = start_time + start_time // 2 + 1  # время, до которого рисуем кривые концентраций
+            exp_exchange_curve = {}
 
-                critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
-                                                        form.cleaned_data['effective_days_worked'],
-                                                        form.cleaned_data['rod_height_before_stop'],
-                                                        form.cleaned_data['crit_conc_before_stop'],
-                                                        maximum_time,
-                                                        block_id)
+            minutes_in_hour = 1440
+            start_time = int(
+                ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).days * minutes_in_hour) +
+                ((form.cleaned_data['start_time'] - form.cleaned_data['stop_time']).seconds / 60))
+            stop_conc = form.cleaned_data['stop_conc']
+            maximum_time = start_time + start_time // 2 + 1  # время, до которого рисуем кривые концентраций
 
-                setting_curve = setting_curve_plotter(maximum_time, critical_curve)
+            critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
+                                                    form.cleaned_data['effective_days_worked'],
+                                                    form.cleaned_data['rod_height_before_stop'],
+                                                    form.cleaned_data['crit_conc_before_stop'],
+                                                    maximum_time,
+                                                    block_id)
 
-                water_exchange_curve = water_exchange_plotter(start_time, maximum_time, form.cleaned_data['stop_conc'],
-                                                              critical_curve, setting_curve)
+            setting_curve = setting_curve_plotter(maximum_time, critical_curve)
 
-                datetime_crit_axis = []
-                datetime_water_exchange_axis = []
-                for i in list(critical_curve.keys()):
-                    datetime_crit_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
-                for i in list(water_exchange_curve.keys()):
-                    datetime_water_exchange_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
-            except:
-                result = 'Ошибка! Не удалось запустить расчет (возможно указано неправильное имя альбома НФХ'
-                return (request, 'bor_calculator/bor_calc_page.html',
-                        {'form': form, 'result': result})
-            return add_points_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
-                                   datetime_crit_axis, datetime_water_exchange_axis)
+            water_exchange_curve = water_exchange_plotter(start_time, maximum_time, form.cleaned_data['stop_conc'],
+                                                          critical_curve, setting_curve)
+
+            datetime_crit_axis = []
+            datetime_water_exchange_axis = []
+            for i in list(critical_curve.keys()):
+                datetime_crit_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
+            for i in list(water_exchange_curve.keys()):
+                datetime_water_exchange_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
+
+            return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
+                              datetime_crit_axis, datetime_water_exchange_axis)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
-def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
-                    water_exchange_axis):
+def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
+               water_exchange_axis):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
     :param request:
@@ -144,8 +155,8 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     plt.grid(which='minor', linestyle=':')
     plt.legend(loc='upper right', shadow=False, fontsize=9)
 
-    ax.set_xticklabels(crit_axis_str)
-    plt.tick_params(axis='x', labelrotation=90)
+    # ax.set_xticklabels(crit_axis_str)
+    # plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
     # plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
@@ -160,12 +171,5 @@ def add_points_page(request, crit_curve_dict, setting_dict, water_exchange_dict,
     string = base64.b64encode(buf.read())
     uri = urllib.parse.quote(string)
 
-    if request.method == 'POST':
-        form = AddPointsForm(request.POST)
-        if form.is_valid():
-            return render(request, 'bor_calculator/add_points_page.html',
-                          {'title': 'Расчет концентрации БК', 'form': form})
-    else:
-        form = AddPointsForm()
-    return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
-                                                                   'form': form, 'graph': uri})
+    return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
+                                                              'graph': uri})

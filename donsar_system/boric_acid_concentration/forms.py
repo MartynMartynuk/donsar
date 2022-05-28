@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Album, Block
+from .models import *
 
 
 class AddAlbumForm(forms.ModelForm):
@@ -9,12 +9,24 @@ class AddAlbumForm(forms.ModelForm):
         model = Album
         fields = ['album_file']
 
-# Теперь название добавляется автоматически по названию документа
-# class AddAlbumNameForm(forms.ModelForm):
-#     """ Форма добавления нового имени альбома НФХ """
-#     class Meta:
-#         model = Block
-#         fields = '__all__'
+
+class AddPointsForm(forms.Form):
+    """ Форма добавления экспериментальных точек на график """
+
+    sample_time = forms.IntegerField(label='Время взятия пробы')
+    sample_conc = forms.IntegerField(label='Концентрация БК')
+
+    def clean_sample_time(self):
+        time = self.cleaned_data['sample_time']
+        if time < 0:
+            raise ValidationError('Некорректный ввод: время отбора пробы не может быть меньше 0!')
+        return time
+
+    def clean_sample_conc(self):
+        concentration = self.cleaned_data['sample_conc']
+        if concentration < 0:
+            raise ValidationError('Некорректный ввод: концентрация БК не может быть меньше 0!')
+        return concentration
 
 
 class BorCalcForm(forms.Form):
@@ -26,7 +38,6 @@ class BorCalcForm(forms.Form):
     stop_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время останова')
     start_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время запуска')
     stop_conc = forms.FloatField(label='Стояночная концентрация БК')
-    # start_time = forms.FloatField(label='Время, через которое будет осуществляться запуск (часов)')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбрано')
 
     def clean_power_before_stop(self):
@@ -68,27 +79,18 @@ class BorCalcForm(forms.Form):
     #     if time
 
 
-class AddPointsForm(forms.Form):
-    """ Форма добавления экспериментальных точек на график """
 
-    sample_time = forms.DateTimeField(label='Время взятия пробы')
-    sample_conc = forms.FloatField(label='Концентрация БК')
 
-    def clean_sample_time(self):
-        time = self.cleaned_data['sample_time']
-        if time < 0:
-            raise ValidationError('Некорректный ввод: время отбора пробы не может быть меньше 0!')
-        return time
-
-    def clean_sample_conc(self):
-        concentration = self.cleaned_data['sample_conc']
-        if concentration < 0:
-            raise ValidationError('Некорректный ввод: концентрация БК не может быть меньше 0!')
-        return concentration
-
-# legacy
+""" Legacy """
 # class BorCalcForm(forms.ModelForm):
 #     """ Форма расчета концентрации БК """
 #     class Meta:
 #         model = BorCalculator
+#         fields = '__all__'
+
+# Теперь название добавляется автоматически по названию документа
+# class AddAlbumNameForm(forms.ModelForm):
+#     """ Форма добавления нового имени альбома НФХ """
+#     class Meta:
+#         model = Block
 #         fields = '__all__'
