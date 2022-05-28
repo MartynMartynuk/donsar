@@ -30,28 +30,16 @@ class AddPointsForm(forms.Form):
         return concentration
 
 
-class BorCalcForm(forms.ModelForm):
+class BorCalcForm(forms.Form):
     """ Форма расчета концентрации БК """
-    start_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время запуска',
-                                     widget=forms.DateTimeInput(
-                                         format='%d.%m.%Y %H:%M',
-                                         attrs={'class': 'form-control'}))
-    stop_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время останова',
-                                    widget=forms.DateTimeInput(
-                                        format='%d.%m.%Y %H:%M',
-                                        attrs={'class': 'form-control'}))
 
-    class Meta:
-        model = CalculationResult
-        fields = '__all__'
-
-    # power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки (% от Nном)')
-    # effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
-    # rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова (%)')
-    # crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова')
-    # stop_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время останова')
-    # start_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время запуска')
-    # stop_conc = forms.FloatField(label='Стояночная концентрация БК')
+    power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки (% от Nном)')
+    effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
+    rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова (%)')
+    crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова')
+    stop_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время останова')
+    start_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время запуска')
+    stop_conc = forms.FloatField(label='Стояночная концентрация БК')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбрано')
 
     def clean_power_before_stop(self):

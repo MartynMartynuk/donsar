@@ -18,10 +18,9 @@ class Block(models.Model):
 
 
 class CalculationResult(models.Model):
-    power_before_stop = models.IntegerField(verbose_name='Мощность ЯР до остановки (% от Nном)')
-    effective_days_worked = models.IntegerField(verbose_name='Число отработанных эффективных суток')
-    rod_height_before_stop = models.IntegerField(verbose_name='Подъем стержней до останова (%)')
-    crit_conc_before_stop = models.FloatField(verbose_name='Критическая концентрация БК до останова')
-    stop_time = models.DateTimeField(verbose_name='Время останова')
-    start_time = models.DateTimeField(verbose_name='Время запуска')
-    stop_conc = models.FloatField(verbose_name='Стояночная концентрация БК')
+    critical_curve = models.JSONField()
+    setting_curve = models.JSONField()
+    water_exchange_curve = models.JSONField()
+    start_time = models.IntegerField()
+    stop_time = models.DateTimeField()
+    stop_conc = models.FloatField()
