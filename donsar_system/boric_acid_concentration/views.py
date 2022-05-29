@@ -1,7 +1,6 @@
 import base64
 import datetime
 import io
-import time
 import urllib.parse
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
@@ -10,6 +9,7 @@ from .models import *
 from .album_handler import *
 from .views_handler import get_start_time, get_maximum_time, get_datetime_axis, get_int_lst, datetime_dict_to_lst
 from .water_exchange_function import *
+from donsar_system.settings import DATE_INPUT_FORMATS
 
 
 def add_album_page(request):
@@ -59,10 +59,10 @@ def add_points(request):
             datetime_water_exchange_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.water_exchange_curve.keys())),
                                                              last_calculation_obj.stop_time)
 
-            last_calculation_obj.exp_exchange_curve[datetime.datetime.strftime(form.cleaned_data['sample_time'], '%d.%m.%Y %H:%M')] \
+            last_calculation_obj.exp_exchange_curve[datetime.datetime.strftime(form.cleaned_data['sample_time'],
+                                                                               DATE_INPUT_FORMATS[0])] \
                 = form.cleaned_data['sample_conc']
             last_calculation_obj.save()
-            # print(last_calculation_obj.exp_exchange_curve)
 
             return graph_page(request,
                               last_calculation_obj.critical_curve,
@@ -143,6 +143,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :param start_time: время начала водообмена
     :param crit_axis: ось абсцисс формата datatime (длинная)
     :param water_exchange_axis: ось абсцисс формата datatime (короткая)
+    :param exp_water_exchange: словарь экспериментальных точек
     :return:
     """
     crit_axis_str = ['25.04.22\n10:00', '25.04.22 11:00', '25.04.22 12:00', '25.04.22 13:00',

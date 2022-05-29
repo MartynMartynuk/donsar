@@ -1,4 +1,5 @@
 import datetime
+from donsar_system.settings import DATE_INPUT_FORMATS
 
 
 def get_start_time(start_time, stop_time):
@@ -29,7 +30,6 @@ def datetime_dict_to_lst(dict_):
     datetime_lst = []
     meaning_lst = []
     for i in dict_.keys():
-        datetime_lst.append(datetime.datetime.strptime(i, '%d.%m.%Y %H:%M'))
+        datetime_lst.append(datetime.datetime.strptime(i, DATE_INPUT_FORMATS[0]))
         meaning_lst.append(dict_[i])
     return datetime_lst, meaning_lst
-

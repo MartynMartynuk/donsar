@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import *
+from donsar_system.settings import DATE_INPUT_FORMATS
 
 
 class AddAlbumForm(forms.ModelForm):
@@ -14,7 +15,7 @@ class AddAlbumForm(forms.ModelForm):
 class AddPointsForm(forms.Form):
     """ Форма добавления экспериментальных точек на график """
 
-    sample_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время взятия пробы')
+    sample_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время взятия пробы')
     sample_conc = forms.FloatField(label='Концентрация БК')
 
     # def clean_sample_time(self):
@@ -23,11 +24,11 @@ class AddPointsForm(forms.Form):
     #         raise ValidationError('Некорректный ввод: время отбора пробы не может быть меньше 0!')
     #     return time
     #
-    # def clean_sample_conc(self):
-    #     concentration = self.cleaned_data['sample_conc']
-    #     if concentration < 0:
-    #         raise ValidationError('Некорректный ввод: концентрация БК не может быть меньше 0!')
-    #     return concentration
+    def clean_sample_conc(self):
+        concentration = self.cleaned_data['sample_conc']
+        if concentration < 0:
+            raise ValidationError('Некорректный ввод: концентрация БК не может быть меньше 0!')
+        return concentration
 
 
 class BorCalcForm(forms.Form):
@@ -37,8 +38,8 @@ class BorCalcForm(forms.Form):
     effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
     rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова (%)')
     crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова')
-    stop_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время останова')
-    start_time = forms.DateTimeField(input_formats=['%d.%m.%Y %H:%M'], label='Время запуска')
+    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова')
+    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска')
     stop_conc = forms.FloatField(label='Стояночная концентрация БК')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбрано')
 
@@ -80,17 +81,3 @@ class BorCalcForm(forms.Form):
     #     time = self.cleaned_data['stop_time']
     #     if time
 
-
-""" Legacy """
-# class BorCalcForm(forms.ModelForm):
-#     """ Форма расчета концентрации БК """
-#     class Meta:
-#         model = BorCalculator
-#         fields = '__all__'
-
-# Теперь название добавляется автоматически по названию документа
-# class AddAlbumNameForm(forms.ModelForm):
-#     """ Форма добавления нового имени альбома НФХ """
-#     class Meta:
-#         model = Block
-#         fields = '__all__'
