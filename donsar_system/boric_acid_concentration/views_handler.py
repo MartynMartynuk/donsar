@@ -23,3 +23,13 @@ def get_int_lst(lst):
     for i in lst:
         int_lst.append(int(i))
     return int_lst
+
+
+def datetime_dict_to_lst(dict_):
+    datetime_lst = []
+    meaning_lst = []
+    for i in dict_.keys():
+        datetime_lst.append(datetime.datetime.strptime(i, '%d.%m.%Y %H:%M'))
+        meaning_lst.append(dict_[i])
+    return datetime_lst, meaning_lst
+

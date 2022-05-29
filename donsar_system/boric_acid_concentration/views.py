@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
 from .album_handler import *
-from .views_handler import get_start_time, get_maximum_time, get_datetime_axis, get_int_lst
+from .views_handler import get_start_time, get_maximum_time, get_datetime_axis, get_int_lst, datetime_dict_to_lst
 from .water_exchange_function import *
 
 
@@ -50,7 +50,6 @@ def add_album_page(request):
 def add_points(request):
     if request.method == 'POST':
         form = AddPointsForm(request.POST)
-        print('!!@123')
 
         if form.is_valid():
             last_calculation_obj = CalculationResult.objects.latest('id')
@@ -60,6 +59,11 @@ def add_points(request):
             datetime_water_exchange_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.water_exchange_curve.keys())),
                                                              last_calculation_obj.stop_time)
 
+            last_calculation_obj.exp_exchange_curve[datetime.datetime.strftime(form.cleaned_data['sample_time'], '%d.%m.%Y %H:%M')] \
+                = form.cleaned_data['sample_conc']
+            last_calculation_obj.save()
+            # print(last_calculation_obj.exp_exchange_curve)
+
             return graph_page(request,
                               last_calculation_obj.critical_curve,
                               last_calculation_obj.setting_curve,
@@ -67,7 +71,8 @@ def add_points(request):
                               last_calculation_obj.start_time,
                               last_calculation_obj.stop_conc,
                               datetime_crit_axis,
-                              datetime_water_exchange_axis)
+                              datetime_water_exchange_axis,
+                              last_calculation_obj.exp_exchange_curve)
     else:
         form = AddPointsForm()
     return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
@@ -116,19 +121,18 @@ def bor_calc_page(request):
                                              water_exchange_curve=water_exchange_curve,
                                              start_time=start_time,
                                              stop_time=form.cleaned_data['stop_time'],
-                                             stop_conc=stop_conc)
-
-            # print(CalculationResult.objects.latest('id').id)
+                                             stop_conc=stop_conc,
+                                             exp_exchange_curve={})
 
             return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
-                              datetime_crit_axis, datetime_water_exchange_axis)
+                              datetime_crit_axis, datetime_water_exchange_axis, {})
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
 def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
-               water_exchange_axis):
+               water_exchange_axis, exp_water_exchange):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
     :param request:
@@ -166,7 +170,12 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
              list(water_exchange_dict.values()),
              color='g',
              label='Концентрация БК при водообмене',
-             # marker='x',
+             linewidth=1)
+    plt.plot(datetime_dict_to_lst(exp_water_exchange)[0],
+             datetime_dict_to_lst(exp_water_exchange)[1],
+             color='cyan',
+             marker='x',
+             label='Практические значения концентрации БК',
              linewidth=1)
 
     plt.xlabel('Время, мин')
@@ -180,9 +189,9 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     # plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
-    # plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
-    #          water_exchange_axis[-1]+datetime.timedelta(hours=1))
-    # plt.ylim((water_exchange_dict[water_exchange_end_time - 1] - 0.5, stop_conc + 0.1))
+    plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
+             water_exchange_axis[-1]+datetime.timedelta(hours=1))
+    plt.ylim((water_exchange_dict[str(int(water_exchange_end_time) - 1)] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()
     plt.savefig('graphs/График.png')

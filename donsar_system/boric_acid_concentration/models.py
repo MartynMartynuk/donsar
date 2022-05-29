@@ -24,3 +24,4 @@ class CalculationResult(models.Model):
     start_time = models.IntegerField()
     stop_time = models.DateTimeField()
     stop_conc = models.FloatField()
+    exp_exchange_curve = models.JSONField(null=True)
