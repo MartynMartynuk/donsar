@@ -149,24 +149,11 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
         if water_exchange_axis[0].minute != 0 \
         else water_exchange_axis[0] - datetime.timedelta(hours=1)
-    print('!!@#', datetime.timedelta(minutes=water_exchange_axis[0].minute))
-    print('!!#', water_exchange_axis[0].minute)
     x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=1)
-    x_mas = []
+    crit_axis_str = []
     while x_current <= x_end_point:
-        x_mas.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
+        crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
         x_current += datetime.timedelta(hours=1)
-
-    print(x_mas)
-    crit_axis_str = ['25.04.22\n10:00', '25.04.22 11:00', '25.04.22 12:00', '25.04.22 13:00',
-                     '25.04.22 14:00', '25.04.22 15:00', '25.04.22 16:00', '25.04.22 17:00']
-    # water_exchange_axis_str = []
-    # for i in crit_axis:
-    #     crit_axis_str.append(datetime.datetime.strftime(i, '%d.%m.%Y %H:%M'))
-    # for i in water_exchange_axis:
-    #     water_exchange_axis_str.append(datetime.datetime.strftime(i, '%d.%m.%Y %H:%M'))
-    # print(crit_axis_str, water_exchange_axis_str)
-    # print('!!!!')
 
     fig, ax = plt.subplots()
     plt.plot(crit_axis,
@@ -198,7 +185,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     plt.grid(which='minor', linestyle=':')
     plt.legend(loc='upper right', shadow=False, fontsize=9)
 
-    ax.set_xticklabels(x_mas)
+    ax.set_xticklabels(crit_axis_str)
     plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
