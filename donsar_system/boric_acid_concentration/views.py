@@ -192,6 +192,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
              water_exchange_axis[-1]+datetime.timedelta(hours=1))
     # plt.ylim((water_exchange_dict[str(int(water_exchange_end_time) - 1)] - 0.5, stop_conc + 0.1))
+    # 45
 
     fig = plt.gcf()
     plt.savefig('graphs/График.png')
