@@ -180,6 +180,10 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
              label='Практические значения концентрации БК',
              linewidth=1)
 
+    print('Время критики', datetime.datetime.strftime(water_exchange_axis[-1],
+                                                      DATE_INPUT_FORMATS[0]))
+    crit_time = datetime.datetime.strftime(water_exchange_axis[-1],DATE_INPUT_FORMATS[0])
+
     plt.xlabel('Время')
     plt.ylabel(r'Концентрация БК, г/$дм^{3}$')
     plt.minorticks_on()
@@ -204,4 +208,4 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     uri = urllib.parse.quote(string)
 
     return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
-                                                              'graph': uri})
+                                                              'graph': uri, 'crit_time': crit_time})

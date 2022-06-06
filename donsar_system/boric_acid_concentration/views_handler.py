@@ -22,8 +22,6 @@ def get_datetime_axis(lst, stop_time):
 def get_int_lst(lst):
     int_lst = []
     for i in lst:
-        # print(i)
-        # print(type(i))
         int_lst.append(int(i))
     return int_lst
 

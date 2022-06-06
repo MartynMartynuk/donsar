@@ -2,11 +2,13 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
-    <li><a href="{% url 'add_points' %}">Добавить экспериментальные точки</a></li>
-{% endblock %}
+    <div>
+        <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
+    </div>
+    <ul>
+        <label>Предполагаемое время наступления критичности:  {{ crit_time }}</label>
+    </ul>
 
-{% block links %}
-    <li><a href="{% url 'main_page' %}">На главную</a></li>
-    <li><a href="{% url 'add_album' %}">Добавить альбом</a></li>
+     <a href="{% url 'add_points' %}">Добавить экспериментальные точки</a>
+<!--    <button type="button" class="btn btn-primary" href="{% url 'add_points' %}">Добавить экспериментальные точки</button>-->
 {% endblock %}
