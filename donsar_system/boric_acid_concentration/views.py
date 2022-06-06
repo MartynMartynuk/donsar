@@ -56,18 +56,24 @@ def add_points(request):
 
             datetime_crit_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.critical_curve.keys())),
                                                    last_calculation_obj.stop_time)
+
+            water_exchange_lst = get_int_lst(list(last_calculation_obj.water_exchange_curve.keys()))
+            water_exchange_curve = dict(zip(water_exchange_lst, list(last_calculation_obj.water_exchange_curve.values())))
+            # из-за того что в базе словарь сохраняется как json, требуется этот велосипед с пересборкой словаря
+            # без него не работает ограничение вывода по оси y
+
             datetime_water_exchange_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.water_exchange_curve.keys())),
                                                              last_calculation_obj.stop_time)
 
             last_calculation_obj.exp_exchange_curve[datetime.datetime.strftime(form.cleaned_data['sample_time'],
                                                                                DATE_INPUT_FORMATS[0])] \
-                = form.cleaned_data['sample_conc']
+                = float(form.cleaned_data['sample_conc'])
             last_calculation_obj.save()
 
             return graph_page(request,
                               last_calculation_obj.critical_curve,
                               last_calculation_obj.setting_curve,
-                              last_calculation_obj.water_exchange_curve,
+                              water_exchange_curve,
                               last_calculation_obj.start_time,
                               last_calculation_obj.stop_conc,
                               datetime_crit_axis,
@@ -111,10 +117,6 @@ def bor_calc_page(request):
                                                    form.cleaned_data['stop_time'])
             datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
                                                              form.cleaned_data['stop_time'])
-            # for i in list(critical_curve.keys()):
-            #     datetime_crit_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
-            # for i in list(water_exchange_curve.keys()):
-            #     datetime_water_exchange_axis.append(form.cleaned_data['stop_time'] + datetime.timedelta(minutes=i))
 
             CalculationResult.objects.create(critical_curve=critical_curve,
                                              setting_curve=setting_curve,
@@ -178,7 +180,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
              label='Практические значения концентрации БК',
              linewidth=1)
 
-    plt.xlabel('Время, мин')
+    plt.xlabel('Время')
     plt.ylabel(r'Концентрация БК, г/$дм^{3}$')
     plt.minorticks_on()
     plt.grid(which='major', linewidth=0.5)
@@ -191,8 +193,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     water_exchange_end_time = len(water_exchange_dict) + start_time
     plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
              water_exchange_axis[-1]+datetime.timedelta(hours=1))
-    # plt.ylim((water_exchange_dict[str(int(water_exchange_end_time) - 1)] - 0.5, stop_conc + 0.1))
-    # 45
+    plt.ylim((water_exchange_dict[int(water_exchange_end_time) - 1] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()
     plt.savefig('graphs/График.png')
