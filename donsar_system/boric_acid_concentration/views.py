@@ -1,5 +1,4 @@
 import base64
-import datetime
 import io
 import urllib.parse
 from django.shortcuts import render, redirect
@@ -7,7 +6,7 @@ import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
 from .album_handler import *
-from .views_handler import get_start_time, get_maximum_time, get_datetime_axis, get_int_lst, datetime_dict_to_lst
+from .views_handler import *
 from .water_exchange_function import *
 from donsar_system.settings import DATE_INPUT_FORMATS
 
@@ -48,6 +47,11 @@ def add_album_page(request):
 
 
 def add_points(request):
+    """
+    Страница добавления точек
+    :param request:
+    :return:
+    """
     if request.method == 'POST':
         form = AddPointsForm(request.POST)
 

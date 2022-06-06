@@ -71,6 +71,12 @@ class BorCalcForm(forms.Form):
             raise ValidationError('Некорректный ввод: концентрация БК не может быть меньше 0!')
         return concentration
 
+    def clean_stop_conc(self):
+        concentration = self.cleaned_data['stop_conc']
+        if concentration < 10:
+            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм3')
+        return concentration
+
     # def clean_start_time(self):
     #     time = self.cleaned_data['start_time']
     #     if time < 0:
