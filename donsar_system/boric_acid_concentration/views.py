@@ -52,11 +52,13 @@ def add_points(request):
     :param request:
     :return:
     """
+    last_calculation_obj = CalculationResult.objects.latest('id')
+    block_ = last_calculation_obj.block
+    print(block_)
     if request.method == 'POST':
         form = AddPointsForm(request.POST)
 
         if form.is_valid():
-            last_calculation_obj = CalculationResult.objects.latest('id')
 
             datetime_crit_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.critical_curve.keys())),
                                                    last_calculation_obj.stop_time)
@@ -82,11 +84,12 @@ def add_points(request):
                               last_calculation_obj.stop_conc,
                               datetime_crit_axis,
                               datetime_water_exchange_axis,
-                              last_calculation_obj.exp_exchange_curve)
+                              last_calculation_obj.exp_exchange_curve,
+                              block_)
     else:
         form = AddPointsForm()
     return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
-                                                                   'form': form})
+                                                                   'block_': block_, 'form': form})
 
 
 def bor_calc_page(request):
@@ -129,7 +132,8 @@ def bor_calc_page(request):
                                              start_time=start_time,
                                              stop_time=form.cleaned_data['stop_time'],
                                              stop_conc=stop_conc,
-                                             exp_exchange_curve={})
+                                             exp_exchange_curve={},
+                                             block=block_name)
 
             return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
                               datetime_crit_axis, datetime_water_exchange_axis, {}, block_name)
