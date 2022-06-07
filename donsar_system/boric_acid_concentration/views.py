@@ -99,6 +99,7 @@ def bor_calc_page(request):
         form = BorCalcForm(request.POST)
         if form.is_valid():
             block_id = int(request.POST['block'])
+            block_name = str(Block.objects.get(pk=block_id))
 
             start_time = get_start_time(form.cleaned_data['start_time'], form.cleaned_data['stop_time'])
             stop_conc = form.cleaned_data['stop_conc']
@@ -131,14 +132,14 @@ def bor_calc_page(request):
                                              exp_exchange_curve={})
 
             return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
-                              datetime_crit_axis, datetime_water_exchange_axis, {})
+                              datetime_crit_axis, datetime_water_exchange_axis, {}, block_name)
     else:
         form = BorCalcForm()
     return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
 
 
 def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
-               water_exchange_axis, exp_water_exchange):
+               water_exchange_axis, exp_water_exchange, block_):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
     :param request:
@@ -212,4 +213,5 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     uri = urllib.parse.quote(string)
 
     return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
-                                                              'graph': uri, 'crit_time': crit_time})
+                                                              'block_': block_, 'graph': uri,
+                                                              'crit_time': crit_time})
