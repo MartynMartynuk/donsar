@@ -2,10 +2,10 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+    <div><h1>{{ block_ }}</h1></div>
     <form action="" method="post">
         {% csrf_token %}
         {% for f in form %}
-        <div><h1>{{ block_ }}</h1></div>
         <div class="form-row col-md-6 mb-0">
             {{ f|as_crispy_field }}
         </div>

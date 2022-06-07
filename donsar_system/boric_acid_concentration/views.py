@@ -92,14 +92,26 @@ def add_points(request):
                                                                    'block_': block_, 'form': form})
 
 
-def bor_calc_page(request):
+def bor_calc_start_page(request):
+    if request.method == 'POST':
+        form = BorCalcStartForm(request.POST)
+        if form.is_valid():
+            block_name = str(Block.objects.get(pk=int(request.POST['block'])))
+            return graph_page()
+    else:
+        form = BorCalcStartForm()
+    return render(request, 'bor_calculator/bor_calc_start_page.html', {'title': 'Расчет концентрации БК',
+                                                                       'form': form})
+
+
+def bor_calc_resume_page(request):
     """
     Страница формы
     :param request:
     :return:
     """
     if request.method == 'POST':
-        form = BorCalcForm(request.POST)
+        form = BorCalcResumeForm(request.POST)
         if form.is_valid():
             block_id = int(request.POST['block'])
             block_name = str(Block.objects.get(pk=block_id))
@@ -138,8 +150,9 @@ def bor_calc_page(request):
             return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
                               datetime_crit_axis, datetime_water_exchange_axis, {}, block_name)
     else:
-        form = BorCalcForm()
-    return render(request, 'bor_calculator/bor_calc_page.html', {'title': 'Расчет концентрации БК', 'form': form})
+        form = BorCalcResumeForm()
+    return render(request, 'bor_calculator/bor_calc_resume_page.html', {'title': 'Расчет концентрации БК',
+                                                                        'form': form})
 
 
 def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
