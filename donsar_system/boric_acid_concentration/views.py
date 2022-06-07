@@ -1,6 +1,9 @@
 import base64
 import io
 import urllib.parse
+
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
 from .forms import *
@@ -213,3 +216,22 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
 
     return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
                                                               'graph': uri, 'crit_time': crit_time})
+
+
+def user_login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = authenticate(username=form.cleaned_data['username'],
+                                password=form.cleaned_data['password'])
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('bor_calc')
+                else:
+                    return HttpResponse('Disabled account')
+            else:
+                return HttpResponse('Invalid login')
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})

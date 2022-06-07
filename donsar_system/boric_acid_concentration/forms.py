@@ -31,6 +31,11 @@ class AddPointsForm(forms.Form):
         return concentration
 
 
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=15, label='Логин')
+    password = forms.CharField(widget=forms.PasswordInput, max_length=15, label='Пароль')
+
+
 class BorCalcForm(forms.Form):
     """ Форма расчета концентрации БК """
 
