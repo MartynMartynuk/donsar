@@ -1,4 +1,5 @@
 import base64
+import datetime
 import io
 import urllib.parse
 from django.shortcuts import render, redirect
@@ -59,17 +60,18 @@ def add_points(request):
         form = AddPointsForm(request.POST)
 
         if form.is_valid():
-
             datetime_crit_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.critical_curve.keys())),
                                                    last_calculation_obj.stop_time)
 
             water_exchange_lst = get_int_lst(list(last_calculation_obj.water_exchange_curve.keys()))
-            water_exchange_curve = dict(zip(water_exchange_lst, list(last_calculation_obj.water_exchange_curve.values())))
+            water_exchange_curve = dict(
+                zip(water_exchange_lst, list(last_calculation_obj.water_exchange_curve.values())))
             # из-за того что в базе словарь сохраняется как json, требуется этот велосипед с пересборкой словаря
             # без него не работает ограничение вывода по оси y
 
-            datetime_water_exchange_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.water_exchange_curve.keys())),
-                                                             last_calculation_obj.stop_time)
+            datetime_water_exchange_axis = get_datetime_axis(
+                get_int_lst(list(last_calculation_obj.water_exchange_curve.keys())),
+                last_calculation_obj.stop_time)
 
             last_calculation_obj.exp_exchange_curve[datetime.datetime.strftime(form.cleaned_data['sample_time'],
                                                                                DATE_INPUT_FORMATS[0])] \
@@ -97,7 +99,43 @@ def bor_calc_start_page(request):
         form = BorCalcStartForm(request.POST)
         if form.is_valid():
             block_name = str(Block.objects.get(pk=int(request.POST['block'])))
-            return graph_page()
+            water_exchange_start_time = form.cleaned_data['water_exchange_start_time']
+
+            time_before_start = 5  # для начала оси координат до старта водообмена
+            time_after_start = 20  # костыль для рисования оси координат вперед
+            crit_axis_start_time = water_exchange_start_time - datetime.timedelta(hours=time_before_start)
+            crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
+            start_time = time_before_start * 60  # время начала водообмена в минутах
+            minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
+
+
+            critical_curve = get_static_concentration(0, minutes, form.cleaned_data['critical_conc'])
+            setting_curve = get_setting_curve(critical_curve, form.cleaned_data['setting_interval'])
+
+            water_exchange_curve = water_exchange_plotter(start_time,
+                                                          minutes,
+                                                          form.cleaned_data['stop_conc'],
+                                                          critical_curve,
+                                                          setting_curve)
+
+            datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
+                                                   crit_axis_start_time)
+            datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
+                                                             water_exchange_start_time)
+
+
+
+
+            return graph_page(request,
+                              crit_curve_dict=critical_curve,
+                              setting_dict=setting_curve,
+                              water_exchange_dict=water_exchange_curve,
+                              start_time=start_time,
+                              stop_conc=form.cleaned_data['stop_conc'],
+                              crit_axis = datetime_crit_axis,
+                              water_exchange_axis = datetime_water_exchange_axis,
+                              exp_water_exchange={},
+                              block_=block_name)
     else:
         form = BorCalcStartForm()
     return render(request, 'bor_calculator/bor_calc_start_page.html', {'title': 'Расчет концентрации БК',
@@ -116,7 +154,7 @@ def bor_calc_resume_page(request):
             block_id = int(request.POST['block'])
             block_name = str(Block.objects.get(pk=block_id))
 
-            start_time = get_start_time(form.cleaned_data['start_time'], form.cleaned_data['stop_time'])
+            start_time = get_time_in_minutes(form.cleaned_data['start_time'], form.cleaned_data['stop_time'])
             stop_conc = form.cleaned_data['stop_conc']
 
             maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
@@ -204,7 +242,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
 
     print('Время критики', datetime.datetime.strftime(water_exchange_axis[-1],
                                                       DATE_INPUT_FORMATS[0]))
-    crit_time = datetime.datetime.strftime(water_exchange_axis[-1],DATE_INPUT_FORMATS[0])
+    crit_time = datetime.datetime.strftime(water_exchange_axis[-1], DATE_INPUT_FORMATS[0])
 
     plt.xlabel('Время')
     plt.ylabel(r'Концентрация БК, г/$дм^{3}$')
@@ -217,8 +255,8 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
-    plt.xlim(water_exchange_axis[0]-datetime.timedelta(hours=1),
-             water_exchange_axis[-1]+datetime.timedelta(hours=1))
+    plt.xlim(water_exchange_axis[0] - datetime.timedelta(hours=1),
+             water_exchange_axis[-1] + datetime.timedelta(hours=1))
     plt.ylim((water_exchange_dict[int(water_exchange_end_time) - 1] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()

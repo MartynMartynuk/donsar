@@ -2,7 +2,7 @@ import datetime
 from donsar_system.settings import DATE_INPUT_FORMATS
 
 
-def get_start_time(start_time, stop_time):
+def get_time_in_minutes(start_time, stop_time):
     minutes_in_hour = 1440
     return int((start_time - stop_time).days * minutes_in_hour +
                (start_time - stop_time).seconds / 60)
@@ -12,10 +12,10 @@ def get_maximum_time(start_time):
     return start_time + start_time // 2 + 1
 
 
-def get_datetime_axis(lst, stop_time):
+def get_datetime_axis(lst, start_time):
     datetime_axis = []
     for minute in lst:
-        datetime_axis.append(stop_time + datetime.timedelta(minutes=minute))
+        datetime_axis.append(start_time + datetime.timedelta(minutes=minute))
     return datetime_axis
 
 
@@ -33,3 +33,17 @@ def datetime_dict_to_lst(dict_):
         datetime_lst.append(datetime.datetime.strptime(i, DATE_INPUT_FORMATS[0]))
         meaning_lst.append(dict_[i])
     return datetime_lst, meaning_lst
+
+
+def get_static_concentration(start_minute: int, end_minute: int, concentration):
+    critical_curve = {}
+    for minute in range(start_minute, end_minute+1):
+        critical_curve[minute] = concentration
+    return critical_curve
+
+
+def get_setting_curve(crit_curve: dict, setting_interval):
+    setting_curve = {}
+    for minute in list(crit_curve.keys()):
+        setting_curve[minute] = crit_curve[minute] + setting_interval
+    return setting_curve
