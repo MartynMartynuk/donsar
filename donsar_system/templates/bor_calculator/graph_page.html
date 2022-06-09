@@ -7,14 +7,14 @@
         <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
         <div>
             {% for i in exp_data %}
-                <div><table> {{ i }}</table></div>
+                <div><li>{{ i }}</li></div>
             {% endfor %}
         </div>
     </div>
     <ul>
         <label>Предполагаемое время наступления критичности:  {{ crit_time }}</label>
     </ul>
-
-     <a href="{% url 'add_points' %}">Добавить экспериментальные точки</a>
-<!--    <button type="button" class="btn btn-primary" href="{% url 'add_points' %}">Добавить экспериментальные точки</button>-->
+    <ul>
+        <a href="{% url 'add_points' %}">Добавить экспериментальные точки</a>
+    </ul>
 {% endblock %}
