@@ -49,7 +49,7 @@ def add_album_page(request):
 
 def add_points(request):
     """
-    Страница добавления точек
+    Страница добавления экспериментальных точек на график
     :param request:
     :return:
     """
@@ -90,11 +90,21 @@ def add_points(request):
                               block_)
     else:
         form = AddPointsForm()
+    exp_water_exchange_str = []
+    for i in last_calculation_obj.exp_exchange_curve.items():
+        exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
     return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
-                                                                   'block_': block_, 'form': form})
+                                                                   'block_': block_,
+                                                                   'form': form,
+                                                                   'exp_data': exp_water_exchange_str})
 
 
 def bor_calc_start_page(request):
+    """
+    Страница заполнения данных для расчета при первом запуске после ППР
+    :param request:
+    :return:
+    """
     if request.method == 'POST':
         form = BorCalcStartForm(request.POST)
         if form.is_valid():
@@ -107,7 +117,6 @@ def bor_calc_start_page(request):
             crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
             start_time = time_before_start * 60  # время начала водообмена в минутах
             minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
-
 
             critical_curve = get_static_concentration(0, minutes, form.cleaned_data['critical_conc'])
             setting_curve = get_setting_curve(critical_curve, form.cleaned_data['setting_interval'])
@@ -150,7 +159,7 @@ def bor_calc_start_page(request):
 
 def bor_calc_resume_page(request):
     """
-    Страница формы
+    Страница заполнения данных для расчета при повторном запуске
     :param request:
     :return:
     """
@@ -281,6 +290,12 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     string = base64.b64encode(buf.read())
     uri = urllib.parse.quote(string)
 
+    exp_water_exchange_str = []
+    for i in exp_water_exchange.items():
+        exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
+    print(exp_water_exchange_str)
+
     return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
                                                               'block_': block_, 'graph': uri,
-                                                              'crit_time': crit_time})
+                                                              'crit_time': crit_time,
+                                                              'exp_data': exp_water_exchange_str})

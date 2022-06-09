@@ -5,6 +5,11 @@
     <div>
         <h1>{{ block_ }}</h1>
         <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
+        <div>
+            {% for i in exp_data %}
+                <div><table> {{ i }}</table></div>
+            {% endfor %}
+        </div>
     </div>
     <ul>
         <label>Предполагаемое время наступления критичности:  {{ crit_time }}</label>
