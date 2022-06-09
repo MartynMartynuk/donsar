@@ -121,10 +121,7 @@ def bor_calc_start_page(request):
             datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
                                                    crit_axis_start_time)
             datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                             water_exchange_start_time)
-
-
-
+                                                             crit_axis_start_time)
 
             return graph_page(request,
                               crit_curve_dict=critical_curve,
@@ -251,7 +248,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     plt.grid(which='minor', linestyle=':')
     plt.legend(loc='upper right', shadow=False, fontsize=9)
 
-    ax.set_xticklabels(crit_axis_str)
+    ax.set_xticklabels(crit_axis_str)  # ToDo работает не всегда, надо пересмотреть
     plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
