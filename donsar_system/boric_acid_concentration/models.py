@@ -22,7 +22,7 @@ class CalculationResult(models.Model):
     setting_curve = models.JSONField()
     water_exchange_curve = models.JSONField()
     start_time = models.IntegerField()
-    stop_time = models.DateTimeField()
+    stop_time = models.DateTimeField()  #ToDo вроде нигде не используется, надо бы убрать
     stop_conc = models.FloatField()
     exp_exchange_curve = models.JSONField(null=True)
     block = models.CharField(max_length=15, null=True)
