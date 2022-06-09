@@ -123,6 +123,15 @@ def bor_calc_start_page(request):
             datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
                                                              crit_axis_start_time)
 
+            CalculationResult.objects.create(critical_curve=critical_curve,
+                                             setting_curve=setting_curve,
+                                             water_exchange_curve=water_exchange_curve,
+                                             start_time=start_time,
+                                             stop_time=crit_axis_start_time,
+                                             stop_conc=form.cleaned_data['stop_conc'],
+                                             exp_exchange_curve={},
+                                             block=block_name)
+
             return graph_page(request,
                               crit_curve_dict=critical_curve,
                               setting_dict=setting_curve,
@@ -182,8 +191,16 @@ def bor_calc_resume_page(request):
                                              exp_exchange_curve={},
                                              block=block_name)
 
-            return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
-                              datetime_crit_axis, datetime_water_exchange_axis, {}, block_name)
+            return graph_page(request,
+                              critical_curve,
+                              setting_curve,
+                              water_exchange_curve,
+                              start_time,
+                              stop_conc,
+                              datetime_crit_axis,
+                              datetime_water_exchange_axis,
+                              {},
+                              block_name)
     else:
         form = BorCalcResumeForm()
     return render(request, 'bor_calculator/bor_calc_resume_page.html', {'title': 'Расчет концентрации БК',
