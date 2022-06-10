@@ -26,14 +26,6 @@ class AddPointsForm(forms.Form):
 
 
 class BorCalcResumeForm(forms.Form):
-    """ Форма расчета концентрации БК при повторном старте """
-    power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки, % от Nном')
-class LoginForm(forms.Form):
-    username = forms.CharField(max_length=15, label='Логин')
-    password = forms.CharField(widget=forms.PasswordInput, max_length=15, label='Пароль')
-
-
-class BorCalcForm(forms.Form):
     """ Форма расчета концентрации БК """
 
     power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки (% от Nном)')

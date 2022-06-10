@@ -13,7 +13,7 @@ from .views_handler import *
 from .water_exchange_function import *
 from donsar_system.settings import DATE_INPUT_FORMATS
 
-#
+
 def add_album_page(request):
     """
     Страница добавления альбома
