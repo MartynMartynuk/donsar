@@ -1,8 +1,8 @@
 import base64
 import io
 import urllib.parse
-
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
@@ -14,6 +14,7 @@ from .water_exchange_function import *
 from donsar_system.settings import DATE_INPUT_FORMATS
 
 
+@login_required(login_url='/login/')
 def add_album_page(request):
     """
     Страница добавления альбома
@@ -57,7 +58,6 @@ def add_points(request):
     """
     last_calculation_obj = CalculationResult.objects.latest('id')
     block_ = last_calculation_obj.block
-    print(block_)
     if request.method == 'POST':
         form = AddPointsForm(request.POST)
 
@@ -265,8 +265,6 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
              label='Практические значения концентрации БК',
              linewidth=1)
 
-    print('Время критики', datetime.datetime.strftime(water_exchange_axis[-1],
-                                                      DATE_INPUT_FORMATS[0]))
     crit_time = datetime.datetime.strftime(water_exchange_axis[-1], DATE_INPUT_FORMATS[0])
 
     plt.xlabel('Время')
@@ -319,3 +317,8 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return render(request, 'logout.html')
