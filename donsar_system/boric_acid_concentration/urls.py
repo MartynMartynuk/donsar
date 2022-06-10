@@ -21,5 +21,6 @@ urlpatterns = [
     path('start_calc/', views.bor_calc_start_page, name='bor_calc_start'),
     path('add/', views.add_album_page, name='add_album'),
     path('graph/', views.graph_page, name='graph'),
-    path('add_points/', views.add_points, name='add_points')
+    path('add_points/', views.add_points, name='add_points'),
+    path('login/', views.user_login, name='login')
 ]

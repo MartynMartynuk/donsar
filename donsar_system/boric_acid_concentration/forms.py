@@ -28,6 +28,15 @@ class AddPointsForm(forms.Form):
 class BorCalcResumeForm(forms.Form):
     """ Форма расчета концентрации БК при повторном старте """
     power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки, % от Nном')
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=15, label='Логин')
+    password = forms.CharField(widget=forms.PasswordInput, max_length=15, label='Пароль')
+
+
+class BorCalcForm(forms.Form):
+    """ Форма расчета концентрации БК """
+
+    power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки (% от Nном)')
     effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
     rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова, %')
     crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова, г/дм3')
@@ -90,3 +99,8 @@ class BorCalcStartForm(forms.Form):
         if setting_interval < 1.3:
             raise ValidationError('Пусковой интервал не может быть меньше 1.3 г/дм3')
         return setting_interval
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=15, label='Логин')
+    password = forms.CharField(widget=forms.PasswordInput, max_length=15, label='Пароль')
