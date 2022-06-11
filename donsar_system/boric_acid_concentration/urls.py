@@ -22,6 +22,6 @@ urlpatterns = [
     path('add/', views.add_album_page, name='add_album'),
     path('graph/', views.graph_page, name='graph'),
     path('add_points/', views.add_points, name='add_points'),
-    path('login/', views.user_login, name='login'),
+    path('login/', views.login_page, name='login'),
     path('logout/', views.user_logout, name='logout')
 ]

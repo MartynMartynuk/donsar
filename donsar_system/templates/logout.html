@@ -4,6 +4,6 @@
 {% block content %}
      <form action="" method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Выйти</button>
+        <a href="{% url 'logout' %}" class="btn btn-primary">Выйти</a>
     </form>
 {% endblock %}
