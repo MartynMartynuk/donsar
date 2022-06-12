@@ -3,7 +3,6 @@ import io
 import urllib.parse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
 from .forms import *
@@ -316,10 +315,11 @@ def login_page(request):
                         user_name = request.user
                         return render(request, 'logout_page.html', {'user_name': user_name})
                     else:
-                        return HttpResponse('Disabled account')
+                        disabled_account = 'Ваш аккаунт отключен'
+                        return render(request, 'login_page.html', {'failed_login': disabled_account, 'form': form})
                 else:
                     invalid_login = 'Неверное имя пользователя или пароль'
-                    return render(request, 'login_page.html', {'invalid_login': invalid_login})
+                    return render(request, 'login_page.html', {'failed_login': invalid_login, 'form': form})
         else:
             form = LoginForm()
         return render(request, 'login_page.html', {'form': form})

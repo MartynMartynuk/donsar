@@ -4,7 +4,7 @@
 {% block content %}
      <form action="" method="post">
         {% csrf_token %}
-         <h2>{{ invalid_login }}</h2>
+         <h3>{{ failed_login }}</h3>
         {% for f in form %}
         <div class="form-row col-md-6 mb-0">
             {{ f|as_crispy_field }}
