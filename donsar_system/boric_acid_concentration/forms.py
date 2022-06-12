@@ -31,10 +31,10 @@ class BorCalcResumeForm(forms.Form):
     power_before_stop = forms.IntegerField(label='Мощность ЯР до остановки (% от Nном)')
     effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
     rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова, %')
-    crit_conc_before_stop = forms.FloatField(label='Критическая концентрация БК до останова, г/дм3')
-    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова, г/дм3')
-    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска, г/дм3')
-    stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм3')
+    crit_conc_before_stop = forms.FloatField(label='Концентрация БК до останова, г/дм<sup>3</sup>')
+    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова, г/дм<sup>3</sup>')
+    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска, г/дм<sup>3</sup>')
+    stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
     def clean_power_before_stop(self):
@@ -68,27 +68,27 @@ class BorCalcResumeForm(forms.Form):
     def clean_stop_conc(self):
         concentration = self.cleaned_data['stop_conc']
         if concentration < 10:
-            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм3')
+            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм<sup>3</sup>')
         return concentration
 
 
 class BorCalcStartForm(forms.Form):
     """ Форма расчета концентрации БК при первом старте после ППР """
     water_exchange_start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время начала водообмена')
-    stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм3')
-    critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм3')
+    stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
+    critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
     def clean_stop_conc(self):
         concentration = self.cleaned_data['stop_conc']
         if concentration < 10:
-            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм3')
+            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм<sup>3</sup>')
         return concentration
 
     def clean_setting_interval(self):
         setting_interval = self.cleaned_data['setting_interval']
         if setting_interval < 1.3:
-            raise ValidationError('Пусковой интервал не может быть меньше 1.3 г/дм3')
+            raise ValidationError('Пусковой интервал не может быть меньше 1.3 г/дм<sup>3</sup>')
         return setting_interval
 
 
