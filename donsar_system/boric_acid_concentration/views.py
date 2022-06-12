@@ -236,14 +236,24 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :param block_: название блока и загрузки для вывода на верху страницы
     :return:
     """
-    x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
-        if water_exchange_axis[0].minute != 0 \
-        else water_exchange_axis[0] - datetime.timedelta(hours=1)
-    x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=1)
-    crit_axis_str = []
-    while x_current <= x_end_point:
-        crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
-        x_current += datetime.timedelta(hours=1)
+    if (water_exchange_axis[-1] - water_exchange_axis[0]) < datetime.timedelta(hours=10):
+        x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
+            if water_exchange_axis[0].minute != 0 \
+            else water_exchange_axis[0] - datetime.timedelta(hours=1)
+        x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=1)
+        crit_axis_str = []
+        while x_current <= x_end_point:
+            crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
+            x_current += datetime.timedelta(hours=1)
+    else:
+        x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
+            if water_exchange_axis[0].minute != 0 \
+            else water_exchange_axis[0] - datetime.timedelta(hours=0)
+        x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=2)
+        crit_axis_str = []
+        while x_current <= x_end_point:
+            crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
+            x_current += datetime.timedelta(hours=2)
 
     fig, ax = plt.subplots()
     plt.plot(crit_axis,
