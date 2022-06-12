@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <form action="" method="post">
+        {% csrf_token %}
+         <div><h3>Вы авторизованы как <strong>{{ user_name }}</strong></h3></div>
+         <a href="{% url 'logout' %}" class="btn btn-primary">Выйти</a>
+    </form>
+{% endblock %}

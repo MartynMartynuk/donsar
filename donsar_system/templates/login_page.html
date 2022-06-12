@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <form action="" method="post">
+        {% csrf_token %}
+         <h2>{{ invalid_login }}</h2>
+        {% for f in form %}
+        <div class="form-row col-md-6 mb-0">
+            {{ f|as_crispy_field }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Авторизоваться</button>
+    </form>
+{% endblock %}

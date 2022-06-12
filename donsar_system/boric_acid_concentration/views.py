@@ -302,8 +302,8 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
 
 def login_page(request):
     if request.user.is_authenticated:
-        print('!!@#', request.user)
-        return render(request, 'logout.html')
+        user_name = request.user
+        return render(request, 'logout_page.html', {'user_name': user_name})
     else:
         if request.method == 'POST':
             form = LoginForm(request.POST)
@@ -313,17 +313,18 @@ def login_page(request):
                 if user is not None:
                     if user.is_active:
                         login(request, user)
-                        return redirect('add_album')
+                        user_name = request.user
+                        return render(request, 'logout_page.html', {'user_name': user_name})
                     else:
                         return HttpResponse('Disabled account')
                 else:
-                    return HttpResponse('Invalid login')
+                    invalid_login = 'Неверное имя пользователя или пароль'
+                    return render(request, 'login_page.html', {'invalid_login': invalid_login})
         else:
             form = LoginForm()
-        return render(request, 'login.html', {'form': form})
+        return render(request, 'login_page.html', {'form': form})
 
 
-def user_logout(request):
+def logout_user(request):
     logout(request)
-    # return render(request, 'logout.html')
     return redirect('login')
