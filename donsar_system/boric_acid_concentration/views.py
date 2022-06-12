@@ -2,7 +2,6 @@ import base64
 import io
 import urllib.parse
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 import matplotlib.pyplot as plt
 from .forms import *
@@ -120,9 +119,10 @@ def bor_calc_start_page(request):
             crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
             start_time = time_before_start * 60  # время начала водообмена в минутах
             minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
+            setting_width = setting_width_chose(form.cleaned_data['critical_conc'])
 
             critical_curve = get_static_concentration(0, minutes, form.cleaned_data['critical_conc'])
-            setting_curve = get_setting_curve(critical_curve, form.cleaned_data['setting_interval'])
+            setting_curve = get_setting_curve(critical_curve, setting_width)
 
             water_exchange_curve = water_exchange_plotter(start_time,
                                                           minutes,

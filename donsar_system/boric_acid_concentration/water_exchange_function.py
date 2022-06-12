@@ -38,17 +38,26 @@ def setting_curve_plotter(maximum_time, crit_curve: dict):
     :return: словарь "уставочных" концентраций
     """
     max_crit_conc = crit_curve[maximum_time - 1]
-    if max_crit_conc < 7.0:
-        setting_width = 1.3
-    elif max_crit_conc > 10.4:
-        setting_width = 1.8
-    else:
-        setting_width = 1.6
+    setting_width = setting_width_chose(max_crit_conc)
 
     setting_curve = {}
     for minute in range(0, maximum_time):
         setting_curve[minute] = crit_curve[minute] + setting_width
     return setting_curve
+
+
+def setting_width_chose(critical_conc):
+    """
+    Выбирает ширину пускового диапазона
+    :param critical_conc: критическая концентрация БК
+    :return:
+    """
+    if critical_conc < 7.0:
+        return 1.3
+    elif critical_conc > 10.4:
+        return 1.8
+    else:
+        return 1.6
 
 
 def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict, setting_curve: dict):

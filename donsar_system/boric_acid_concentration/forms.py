@@ -77,7 +77,6 @@ class BorCalcStartForm(forms.Form):
     water_exchange_start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время начала водообмена')
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм3')
     critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм3')
-    setting_interval = forms.FloatField(label='Пусковой диапазон, г/дм3')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
     def clean_stop_conc(self):
