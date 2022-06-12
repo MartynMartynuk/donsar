@@ -223,6 +223,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
                water_exchange_axis, exp_water_exchange, block_):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
+
     :param request:
     :param crit_curve_dict: словарь критических концентраций (время: значение)
     :param setting_dict: словарь уставочных концентраций (время: значение)
@@ -232,6 +233,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :param crit_axis: ось абсцисс формата datatime (длинная)
     :param water_exchange_axis: ось абсцисс формата datatime (короткая)
     :param exp_water_exchange: словарь экспериментальных точек
+    :param block_: название блока и загрузки для вывода на верху страницы
     :return:
     """
     x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
@@ -324,7 +326,7 @@ def login_page(request):
                     return render(request, 'login_page.html', {'failed_login': invalid_login, 'form': form})
         else:
             form = LoginForm()
-        return render(request, 'login_page.html', {'form': form})
+        return render(request, 'login_page.html', {'title': 'Авторизация пользователя', 'form': form})
 
 
 def logout_user(request):
