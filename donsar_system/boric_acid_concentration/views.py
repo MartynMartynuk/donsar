@@ -236,6 +236,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :param block_: название блока и загрузки для вывода на верху страницы
     :return:
     """
+    # ToDo выглядит как велосипед, переделать бы отсюда
     if (water_exchange_axis[-1] - water_exchange_axis[0]) < datetime.timedelta(hours=10):
         x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
             if water_exchange_axis[0].minute != 0 \
@@ -246,14 +247,18 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
             crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
             x_current += datetime.timedelta(hours=1)
     else:
-        x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
-            if water_exchange_axis[0].minute != 0 \
-            else water_exchange_axis[0] - datetime.timedelta(hours=0)
+        if water_exchange_axis[0].hour % 2 == 0:
+            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute)
+        elif water_exchange_axis[0].minute != 0:
+            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute-60)
+        else:
+            x_current = water_exchange_axis[0] - datetime.timedelta(hours=1)
         x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=2)
         crit_axis_str = []
         while x_current <= x_end_point:
             crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
             x_current += datetime.timedelta(hours=2)
+    # ToDo переделать до сюда
 
     fig, ax = plt.subplots()
     plt.plot(crit_axis,
@@ -287,7 +292,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     plt.grid(which='minor', linestyle=':')
     plt.legend(loc='upper right', shadow=False, fontsize=9)
 
-    ax.set_xticklabels(crit_axis_str)  # ToDo работает не всегда, надо пересмотреть
+    ax.set_xticklabels(crit_axis_str)
     plt.tick_params(axis='x', labelrotation=90)
 
     water_exchange_end_time = len(water_exchange_dict) + start_time
