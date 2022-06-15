@@ -95,6 +95,7 @@ def add_points(request):
     exp_water_exchange_str = []
     for i in last_calculation_obj.exp_exchange_curve.items():
         exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
+    exp_water_exchange_str.sort()
     return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
                                                                    'block_': block_,
                                                                    'form': form,
@@ -134,6 +135,8 @@ def bor_calc_start_page(request):
                                                    crit_axis_start_time)
             datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
                                                              crit_axis_start_time)
+
+            CalculationResult.objects.all().delete()
 
             CalculationResult.objects.create(critical_curve=critical_curve,
                                              setting_curve=setting_curve,
@@ -193,6 +196,9 @@ def bor_calc_resume_page(request):
                                                    form.cleaned_data['stop_time'])
             datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
                                                              form.cleaned_data['stop_time'])
+
+            CalculationResult.objects.all().delete()  # защищает от переполнения
+
 
             CalculationResult.objects.create(critical_curve=critical_curve,
                                              setting_curve=setting_curve,
@@ -311,6 +317,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     exp_water_exchange_str = []
     for i in exp_water_exchange.items():
         exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
+    exp_water_exchange_str.sort()
 
     return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
                                                               'block_': block_, 'graph': uri,
