@@ -1,5 +1,5 @@
 import math
-from boric_acid_concentration.calculate_function import *
+from boric_acid_concentration.services.calculate_function import *
 
 
 def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_before_stop,

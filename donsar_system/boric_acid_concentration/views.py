@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
 from .album_handler import *
-from .views_handler import *
-from .water_exchange_function import *
+from boric_acid_concentration.services.views_handler import *
+from boric_acid_concentration.services.water_exchange_function import *
 from donsar_system.settings import DATE_INPUT_FORMATS
 
 
