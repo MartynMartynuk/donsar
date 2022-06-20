@@ -1,9 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import *
-from donsar_system.settings import DATE_INPUT_FORMATS
-from .views_handler import *
-from .water_exchange_function import *
+from boric_acid_concentration.services.views_handler import *
+from boric_acid_concentration.services.water_exchange_function import *
 
 
 class AddAlbumForm(forms.ModelForm):
