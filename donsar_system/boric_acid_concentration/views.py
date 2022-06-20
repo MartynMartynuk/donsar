@@ -34,13 +34,20 @@ def add_album_page(request):
                 block_id = Block.objects.get(block_number=block_num, batch_number=batch_num).pk
                 document_obj = open_file(file_name)
                 Album.objects.create(title='table1', content=handler(document_obj, 0, 2, 28, 1, 10), block_id=block_id)
-                Album.objects.create(title='table2_start', content=handler(document_obj, 1, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_100', content=handler(document_obj, 2, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_200', content=handler(document_obj, 3, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_300', content=handler(document_obj, 4, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_400', content=handler(document_obj, 5, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_500', content=handler(document_obj, 6, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_end', content=handler(document_obj, 7, 1, 11, 1, 5), block_id=block_id)
+                Album.objects.create(title='table2_start', content=handler(document_obj, 1, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_100', content=handler(document_obj, 2, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_200', content=handler(document_obj, 3, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_300', content=handler(document_obj, 4, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_400', content=handler(document_obj, 5, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_500', content=handler(document_obj, 6, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_end', content=handler(document_obj, 7, 1, 11, 1, 5),
+                                     block_id=block_id)
                 Album.objects.create(title='table3', content=handler(document_obj, 8, 2, 75, 1, 8), block_id=block_id)
                 Album.objects.create(title='table4', content=handler(document_obj, 9, 1, 28, 1, 15), block_id=block_id)
                 return redirect('bor_calc')
@@ -108,7 +115,17 @@ class BorCalcStartPage(FormView, TemplateView):
     template_name = 'bor_calculator/bor_calc_start_page.html'
 
     def form_valid(self, form):
-        form.bor_calc_start_handler()
+        output_calc = form.bor_calc_start_handler()
+        return graph_page(self.request,
+                          crit_curve_dict=output_calc['crit_curve_dict'],
+                          setting_dict=output_calc['setting_dict'],
+                          water_exchange_dict=output_calc['water_exchange_dict'],
+                          start_time=output_calc['start_time'],
+                          stop_conc=output_calc['stop_conc'],
+                          crit_axis=output_calc['crit_axis'],
+                          water_exchange_axis=output_calc['water_exchange_axis'],
+                          exp_water_exchange=output_calc['exp_water_exchange'],
+                          block_=output_calc['block_'])
 
 
 def bor_calc_start_page(request):
@@ -156,16 +173,10 @@ def bor_calc_start_page(request):
                                              exp_exchange_curve={},
                                              block=block_name)
 
-            return graph_page(request,
-                              crit_curve_dict=critical_curve,
-                              setting_dict=setting_curve,
-                              water_exchange_dict=water_exchange_curve,
-                              start_time=start_time,
-                              stop_conc=form.cleaned_data['stop_conc'],
-                              crit_axis = datetime_crit_axis,
-                              water_exchange_axis = datetime_water_exchange_axis,
-                              exp_water_exchange={},
-                              block_=block_name)
+            return graph_page(request, setting_dict=setting_curve, water_exchange_dict=water_exchange_curve,
+                              start_time=start_time, stop_conc=form.cleaned_data['stop_conc'],
+                              crit_axis=datetime_crit_axis, water_exchange_axis=datetime_water_exchange_axis,
+                              exp_water_exchange={}, block_=block_name)
     else:
         form = BorCalcStartForm()
     return render(request, 'bor_calculator/bor_calc_start_page.html', {'title': 'Расчет концентрации БК',
@@ -208,7 +219,6 @@ def bor_calc_resume_page(request):
 
             CalculationResult.objects.all().delete()  # защищает от переполнения
 
-
             CalculationResult.objects.create(critical_curve=critical_curve,
                                              setting_curve=setting_curve,
                                              water_exchange_curve=water_exchange_curve,
@@ -218,23 +228,15 @@ def bor_calc_resume_page(request):
                                              exp_exchange_curve={},
                                              block=block_name)
 
-            return graph_page(request,
-                              critical_curve,
-                              setting_curve,
-                              water_exchange_curve,
-                              start_time,
-                              stop_conc,
-                              datetime_crit_axis,
-                              datetime_water_exchange_axis,
-                              {},
-                              block_name)
+            return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
+                              datetime_crit_axis, datetime_water_exchange_axis, {})
     else:
         form = BorCalcResumeForm()
     return render(request, 'bor_calculator/bor_calc_resume_page.html', {'title': 'Расчет концентрации БК',
                                                                         'form': form})
 
 
-def graph_page(crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
+def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
                water_exchange_axis, exp_water_exchange, block_):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
@@ -265,7 +267,7 @@ def graph_page(crit_curve_dict, setting_dict, water_exchange_dict, start_time, s
         if water_exchange_axis[0].hour % 2 == 0:
             x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute)
         elif water_exchange_axis[0].minute != 0:
-            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute-60)
+            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute - 60)
         else:
             x_current = water_exchange_axis[0] - datetime.timedelta(hours=1)
         x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=2)
@@ -328,10 +330,12 @@ def graph_page(crit_curve_dict, setting_dict, water_exchange_dict, start_time, s
         exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
     exp_water_exchange_str.sort()
 
-    return render('bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
-                                                              'block_': block_, 'graph': uri,
-                                                              'crit_time': crit_time,
-                                                              'exp_data': exp_water_exchange_str})
+    return render(request,
+                  'bor_calculator/graph_page.html',
+                  {'title': 'Добавление экспериментальных точек',
+                   'block_': block_, 'graph': uri,
+                   'crit_time': crit_time,
+                   'exp_data': exp_water_exchange_str})
 
 
 def login_page(request):

@@ -2,7 +2,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import *
 from donsar_system.settings import DATE_INPUT_FORMATS
-from .views import *
 from .views_handler import *
 from .water_exchange_function import *
 
@@ -95,8 +94,7 @@ class BorCalcStartForm(forms.Form):
         return setting_interval
 
     def bor_calc_start_handler(self):
-        print(self.cleaned_data)
-        block_name = str(Block.objects.get(pk=int(self.cleaned_data['block'])))
+        block_name = str(self.cleaned_data['block'])
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
 
         time_before_start = 5  # для начала оси координат до старта водообмена
@@ -132,15 +130,15 @@ class BorCalcStartForm(forms.Form):
                                          exp_exchange_curve={},
                                          block=block_name)
 
-        return graph_page(crit_curve_dict=critical_curve,
-                          setting_dict=setting_curve,
-                          water_exchange_dict=water_exchange_curve,
-                          start_time=start_time,
-                          stop_conc=self.cleaned_data['stop_conc'],
-                          crit_axis=datetime_crit_axis,
-                          water_exchange_axis=datetime_water_exchange_axis,
-                          exp_water_exchange={},
-                          block_=block_name)
+        return dict(crit_curve_dict=critical_curve,
+                    setting_dict=setting_curve,
+                    water_exchange_dict=water_exchange_curve,
+                    start_time=start_time,
+                    stop_conc=self.cleaned_data['stop_conc'],
+                    crit_axis=datetime_crit_axis,
+                    water_exchange_axis=datetime_water_exchange_axis,
+                    exp_water_exchange={},
+                    block_=block_name)
 
 
 class LoginForm(forms.Form):
