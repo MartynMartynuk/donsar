@@ -128,61 +128,6 @@ class BorCalcStartPage(FormView, TemplateView):
                           block_=output_calc['block_'])
 
 
-def bor_calc_start_page(request):
-    """
-    Страница заполнения данных для расчета при первом запуске после ППР
-    :param request:
-    :return:
-    """
-    if request.method == 'POST':
-        form = BorCalcStartForm(request.POST)
-        if form.is_valid():
-            block_name = str(Block.objects.get(pk=int(request.POST['block'])))
-            water_exchange_start_time = form.cleaned_data['water_exchange_start_time']
-
-            time_before_start = 5  # для начала оси координат до старта водообмена
-            time_after_start = 20  # костыль для рисования оси координат вперед
-            crit_axis_start_time = water_exchange_start_time - datetime.timedelta(hours=time_before_start)
-            crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
-            start_time = time_before_start * 60  # время начала водообмена в минутах
-            minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
-            setting_width = setting_width_chose(form.cleaned_data['critical_conc'])
-
-            critical_curve = get_static_concentration(0, minutes, form.cleaned_data['critical_conc'])
-            setting_curve = get_setting_curve(critical_curve, setting_width)
-
-            water_exchange_curve = water_exchange_plotter(start_time,
-                                                          minutes,
-                                                          form.cleaned_data['stop_conc'],
-                                                          critical_curve,
-                                                          setting_curve)
-
-            datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
-                                                   crit_axis_start_time)
-            datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                             crit_axis_start_time)
-
-            CalculationResult.objects.all().delete()
-
-            CalculationResult.objects.create(critical_curve=critical_curve,
-                                             setting_curve=setting_curve,
-                                             water_exchange_curve=water_exchange_curve,
-                                             start_time=start_time,
-                                             stop_time=crit_axis_start_time,
-                                             stop_conc=form.cleaned_data['stop_conc'],
-                                             exp_exchange_curve={},
-                                             block=block_name)
-
-            return graph_page(request, setting_dict=setting_curve, water_exchange_dict=water_exchange_curve,
-                              start_time=start_time, stop_conc=form.cleaned_data['stop_conc'],
-                              crit_axis=datetime_crit_axis, water_exchange_axis=datetime_water_exchange_axis,
-                              exp_water_exchange={}, block_=block_name)
-    else:
-        form = BorCalcStartForm()
-    return render(request, 'bor_calculator/bor_calc_start_page.html', {'title': 'Расчет концентрации БК',
-                                                                       'form': form})
-
-
 def bor_calc_resume_page(request):
     """
     Страница заполнения данных для расчета при повторном запуске
