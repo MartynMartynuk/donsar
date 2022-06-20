@@ -3,6 +3,7 @@ import io
 import urllib.parse
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
+from django.views.generic import *
 import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
@@ -100,6 +101,14 @@ def add_points(request):
                                                                    'block_': block_,
                                                                    'form': form,
                                                                    'exp_data': exp_water_exchange_str})
+
+
+class BorCalcStartPage(FormView, TemplateView):
+    form_class = BorCalcStartForm
+    template_name = 'bor_calculator/bor_calc_start_page.html'
+
+    def form_valid(self, form):
+        form.bor_calc_start_handler()
 
 
 def bor_calc_start_page(request):
@@ -225,7 +234,7 @@ def bor_calc_resume_page(request):
                                                                         'form': form})
 
 
-def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
+def graph_page(crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
                water_exchange_axis, exp_water_exchange, block_):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
@@ -319,7 +328,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
         exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
     exp_water_exchange_str.sort()
 
-    return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
+    return render('bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
                                                               'block_': block_, 'graph': uri,
                                                               'crit_time': crit_time,
                                                               'exp_data': exp_water_exchange_str})
