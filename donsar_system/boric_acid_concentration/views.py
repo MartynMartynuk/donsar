@@ -110,12 +110,9 @@ def add_points(request):
                                                                    'exp_data': exp_water_exchange_str})
 
 
-class BorCalcStartPage(FormView, TemplateView):
-    form_class = BorCalcStartForm
-    template_name = 'bor_calculator/bor_calc_page.html'
-
+class BorCalcPage(FormView, TemplateView):
     def form_valid(self, form):
-        output_calc = form.bor_calc_start_handler()
+        output_calc = form.bor_calc_handler()
         return graph_page(self.request,
                           crit_curve_dict=output_calc['crit_curve_dict'],
                           setting_dict=output_calc['setting_dict'],
@@ -128,23 +125,14 @@ class BorCalcStartPage(FormView, TemplateView):
                           block_=output_calc['block_'])
 
 
-class BorCalcResumePage(FormView, TemplateView):
+class BorCalcResumePage(BorCalcPage):
     form_class = BorCalcResumeForm
     template_name = 'bor_calculator/bor_calc_page.html'
 
-    def form_valid(self, form):
-        output_calc = form.bor_calc_resume_handler()
 
-        return graph_page(self.request,
-                          crit_curve_dict=output_calc['crit_curve_dict'],
-                          setting_dict=output_calc['setting_dict'],
-                          water_exchange_dict=output_calc['water_exchange_dict'],
-                          start_time=output_calc['start_time'],
-                          stop_conc=output_calc['stop_conc'],
-                          crit_axis=output_calc['crit_axis'],
-                          water_exchange_axis=output_calc['water_exchange_axis'],
-                          exp_water_exchange=output_calc['exp_water_exchange'],
-                          block_=output_calc['block_'])
+class BorCalcStartPage(BorCalcPage):
+    form_class = BorCalcStartForm
+    template_name = 'bor_calculator/bor_calc_page.html'
 
 
 def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
