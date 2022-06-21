@@ -112,7 +112,7 @@ def add_points(request):
 
 class BorCalcStartPage(FormView, TemplateView):
     form_class = BorCalcStartForm
-    template_name = 'bor_calculator/bor_calc_start_page.html'
+    template_name = 'bor_calculator/bor_calc_page.html'
 
     def form_valid(self, form):
         output_calc = form.bor_calc_start_handler()
@@ -128,57 +128,23 @@ class BorCalcStartPage(FormView, TemplateView):
                           block_=output_calc['block_'])
 
 
-def bor_calc_resume_page(request):
-    """
-    Страница заполнения данных для расчета при повторном запуске
-    :param request:
-    :return:
-    """
-    if request.method == 'POST':
-        form = BorCalcResumeForm(request.POST)
-        if form.is_valid():
-            block_id = int(request.POST['block'])
-            block_name = str(Block.objects.get(pk=block_id))
+class BorCalcResumePage(FormView, TemplateView):
+    form_class = BorCalcResumeForm
+    template_name = 'bor_calculator/bor_calc_page.html'
 
-            start_time = get_time_in_minutes(form.cleaned_data['start_time'], form.cleaned_data['stop_time'])
-            stop_conc = form.cleaned_data['stop_conc']
+    def form_valid(self, form):
+        output_calc = form.bor_calc_resume_handler()
 
-            maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
-
-            critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
-                                                    form.cleaned_data['effective_days_worked'],
-                                                    form.cleaned_data['rod_height_before_stop'],
-                                                    form.cleaned_data['crit_conc_before_stop'],
-                                                    maximum_time,
-                                                    block_id)
-
-            setting_curve = setting_curve_plotter(maximum_time, critical_curve)
-
-            water_exchange_curve = water_exchange_plotter(start_time, maximum_time, form.cleaned_data['stop_conc'],
-                                                          critical_curve, setting_curve)
-
-            datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
-                                                   form.cleaned_data['stop_time'])
-            datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                             form.cleaned_data['stop_time'])
-
-            CalculationResult.objects.all().delete()  # защищает от переполнения
-
-            CalculationResult.objects.create(critical_curve=critical_curve,
-                                             setting_curve=setting_curve,
-                                             water_exchange_curve=water_exchange_curve,
-                                             start_time=start_time,
-                                             stop_time=form.cleaned_data['stop_time'],
-                                             stop_conc=stop_conc,
-                                             exp_exchange_curve={},
-                                             block=block_name)
-
-            return graph_page(request, critical_curve, setting_curve, water_exchange_curve, start_time, stop_conc,
-                              datetime_crit_axis, datetime_water_exchange_axis, {})
-    else:
-        form = BorCalcResumeForm()
-    return render(request, 'bor_calculator/bor_calc_resume_page.html', {'title': 'Расчет концентрации БК',
-                                                                        'form': form})
+        return graph_page(self.request,
+                          crit_curve_dict=output_calc['crit_curve_dict'],
+                          setting_dict=output_calc['setting_dict'],
+                          water_exchange_dict=output_calc['water_exchange_dict'],
+                          start_time=output_calc['start_time'],
+                          stop_conc=output_calc['stop_conc'],
+                          crit_axis=output_calc['crit_axis'],
+                          water_exchange_axis=output_calc['water_exchange_axis'],
+                          exp_water_exchange=output_calc['exp_water_exchange'],
+                          block_=output_calc['block_'])
 
 
 def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,

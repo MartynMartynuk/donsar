@@ -38,6 +38,54 @@ class BorCalcResumeForm(forms.Form):
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
+    def bor_calc_resume_handler(self):
+        block_id = self.cleaned_data['block'].pk
+        block_name = self.cleaned_data['block']
+
+        start_time = get_time_in_minutes(self.cleaned_data['start_time'], self.cleaned_data['stop_time'])
+        stop_conc = self.cleaned_data['stop_conc']
+
+        maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
+
+        critical_curve = critical_curve_plotter(self.cleaned_data['power_before_stop'],
+                                                self.cleaned_data['effective_days_worked'],
+                                                self.cleaned_data['rod_height_before_stop'],
+                                                self.cleaned_data['crit_conc_before_stop'],
+                                                maximum_time,
+                                                block_id)
+
+        setting_curve = setting_curve_plotter(maximum_time, critical_curve)
+
+        water_exchange_curve = water_exchange_plotter(start_time, maximum_time, self.cleaned_data['stop_conc'],
+                                                      critical_curve, setting_curve)
+
+        datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
+                                               self.cleaned_data['stop_time'])
+        datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
+                                                         self.cleaned_data['stop_time'])
+
+        CalculationResult.objects.all().delete()  # защищает от переполнения
+
+        CalculationResult.objects.create(critical_curve=critical_curve,
+                                         setting_curve=setting_curve,
+                                         water_exchange_curve=water_exchange_curve,
+                                         start_time=start_time,
+                                         stop_time=self.cleaned_data['stop_time'],
+                                         stop_conc=stop_conc,
+                                         exp_exchange_curve={},
+                                         block=block_name)
+
+        return dict(crit_curve_dict=critical_curve,
+                    setting_dict=setting_curve,
+                    water_exchange_dict=water_exchange_curve,
+                    start_time=start_time,
+                    stop_conc=stop_conc,
+                    crit_axis=datetime_crit_axis,
+                    water_exchange_axis=datetime_water_exchange_axis,
+                    exp_water_exchange={},
+                    block_=block_name)
+
+
     def clean_power_before_stop(self):
         power = self.cleaned_data['power_before_stop']
         valid_power_list = [104, 100, 90, 80, 70, 60, 50, 40, 30]
@@ -79,18 +127,6 @@ class BorCalcStartForm(forms.Form):
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
-
-    def clean_stop_conc(self):
-        concentration = self.cleaned_data['stop_conc']
-        if concentration < 10:
-            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм<sup>3</sup>')
-        return concentration
-
-    def clean_setting_interval(self):
-        setting_interval = self.cleaned_data['setting_interval']
-        if setting_interval < 1.3:
-            raise ValidationError('Пусковой интервал не может быть меньше 1.3 г/дм<sup>3</sup>')
-        return setting_interval
 
     def bor_calc_start_handler(self):
         block_name = str(self.cleaned_data['block'])
@@ -138,6 +174,18 @@ class BorCalcStartForm(forms.Form):
                     water_exchange_axis=datetime_water_exchange_axis,
                     exp_water_exchange={},
                     block_=block_name)
+
+    def clean_stop_conc(self):
+        concentration = self.cleaned_data['stop_conc']
+        if concentration < 10:
+            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм<sup>3</sup>')
+        return concentration
+
+    def clean_setting_interval(self):
+        setting_interval = self.cleaned_data['setting_interval']
+        if setting_interval < 1.3:
+            raise ValidationError('Пусковой интервал не может быть меньше 1.3 г/дм<sup>3</sup>')
+        return setting_interval
 
 
 class LoginForm(forms.Form):

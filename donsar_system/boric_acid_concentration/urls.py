@@ -18,8 +18,8 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('', views.bor_calc_resume_page, name='bor_calc'),
-    # path('start_calc/', views.bor_calc_start_page, name='bor_calc_start'),
+    # path('', views.bor_calc_resume_page, name='bor_calc'),
+    path('', BorCalcResumePage.as_view(), name='bor_calc'),
     path('start_calc/', BorCalcStartPage.as_view(), name='bor_calc_start'),
     path('add_album/', views.add_album_page, name='add_album'),
     path('graph/', views.graph_page, name='graph'),
