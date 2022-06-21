@@ -2,6 +2,7 @@ import base64
 import io
 import urllib.parse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.views.generic import *
 import matplotlib.pyplot as plt
@@ -237,35 +238,41 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
                    'exp_data': exp_water_exchange_str})
 
 
-def login_page(request):
-    if request.user.is_authenticated:
-        user_name = request.user
-        return render(request, 'logout_page.html', {'title': 'Авторизация пройдена', 'user_name': user_name})
-    else:
-        if request.method == 'POST':
-            form = LoginForm(request.POST)
-            if form.is_valid():
-                user = authenticate(username=form.cleaned_data['username'],
-                                    password=form.cleaned_data['password'])
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        user_name = request.user
-                        return render(request, 'logout_page.html', {'title': 'Авторизация пройдена',
-                                                                    'user_name': user_name})
-                    else:
-                        disabled_account = 'Ваш аккаунт отключен'
-                        return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
-                                                                   'failed_login': disabled_account,
-                                                                   'form': form})
-                else:
-                    invalid_login = 'Неверное имя пользователя или пароль'
-                    return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
-                                                               'failed_login': invalid_login,
-                                                               'form': form})
+class LoginPage(LoginView):
+    form_class = LoginForm
+    template_name = 'bor_calculator/bor_calc_page.html'
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            user_name = request.user
+            return render(request, 'logout_page.html', {'title': 'Авторизация пройдена', 'user_name': user_name})
         else:
-            form = LoginForm()
-        return render(request, 'login_page.html', {'title': 'Авторизация пользователя', 'form': form})
+            form = self.form_class()
+            return render(request, 'login_page.html', {'title': 'Авторизация пользователя', 'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password'],
+            )
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    user_name = request.user
+                    return render(request, 'logout_page.html', {'title': 'Авторизация пройдена',
+                                                                'user_name': user_name})
+                else:
+                    disabled_account = 'Ваш аккаунт отключен'
+                    return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
+                                                               'failed_login': disabled_account,
+                                                               'form': form})
+            else:
+                invalid_login = 'Неверное имя пользователя или пароль'
+                return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
+                                                           'failed_login': invalid_login,
+                                                           'form': form})
 
 
 def logout_user(request):

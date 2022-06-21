@@ -18,12 +18,12 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    # path('', views.bor_calc_resume_page, name='bor_calc'),
     path('', BorCalcResumePage.as_view(), name='bor_calc'),
     path('start_calc/', BorCalcStartPage.as_view(), name='bor_calc_start'),
     path('add_album/', views.add_album_page, name='add_album'),
     path('graph/', views.graph_page, name='graph'),
     path('add_points/', views.add_points, name='add_points'),
-    path('login/', views.login_page, name='login'),
+    # path('login/', views.login_page, name='login'),
+    path('login/', LoginPage.as_view(), name='login'),
     path('logout/', views.logout_user, name='logout')
 ]
