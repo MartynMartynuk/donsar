@@ -2,11 +2,13 @@ import base64
 import io
 import urllib.parse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
+from django.views.generic import *
 import matplotlib.pyplot as plt
 from .forms import *
 from .models import *
-from .album_handler import *
+from boric_acid_concentration.services.album_handler import *
 from boric_acid_concentration.services.views_handler import *
 from boric_acid_concentration.services.water_exchange_function import *
 from donsar_system.settings import DATE_INPUT_FORMATS
@@ -33,13 +35,20 @@ def add_album_page(request):
                 block_id = Block.objects.get(block_number=block_num, batch_number=batch_num).pk
                 document_obj = open_file(file_name)
                 Album.objects.create(title='table1', content=handler(document_obj, 0, 2, 28, 1, 10), block_id=block_id)
-                Album.objects.create(title='table2_start', content=handler(document_obj, 1, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_100', content=handler(document_obj, 2, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_200', content=handler(document_obj, 3, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_300', content=handler(document_obj, 4, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_400', content=handler(document_obj, 5, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_500', content=handler(document_obj, 6, 1, 11, 1, 5), block_id=block_id)
-                Album.objects.create(title='table2_end', content=handler(document_obj, 7, 1, 11, 1, 5), block_id=block_id)
+                Album.objects.create(title='table2_start', content=handler(document_obj, 1, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_100', content=handler(document_obj, 2, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_200', content=handler(document_obj, 3, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_300', content=handler(document_obj, 4, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_400', content=handler(document_obj, 5, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_500', content=handler(document_obj, 6, 1, 11, 1, 5),
+                                     block_id=block_id)
+                Album.objects.create(title='table2_end', content=handler(document_obj, 7, 1, 11, 1, 5),
+                                     block_id=block_id)
                 Album.objects.create(title='table3', content=handler(document_obj, 8, 2, 75, 1, 8), block_id=block_id)
                 Album.objects.create(title='table4', content=handler(document_obj, 9, 1, 28, 1, 15), block_id=block_id)
                 return redirect('bor_calc')
@@ -102,127 +111,29 @@ def add_points(request):
                                                                    'exp_data': exp_water_exchange_str})
 
 
-def bor_calc_start_page(request):
-    """
-    Страница заполнения данных для расчета при первом запуске после ППР
-    :param request:
-    :return:
-    """
-    if request.method == 'POST':
-        form = BorCalcStartForm(request.POST)
-        if form.is_valid():
-            block_name = str(Block.objects.get(pk=int(request.POST['block'])))
-            water_exchange_start_time = form.cleaned_data['water_exchange_start_time']
-
-            time_before_start = 5  # для начала оси координат до старта водообмена
-            time_after_start = 20  # костыль для рисования оси координат вперед
-            crit_axis_start_time = water_exchange_start_time - datetime.timedelta(hours=time_before_start)
-            crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
-            start_time = time_before_start * 60  # время начала водообмена в минутах
-            minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
-            setting_width = setting_width_chose(form.cleaned_data['critical_conc'])
-
-            critical_curve = get_static_concentration(0, minutes, form.cleaned_data['critical_conc'])
-            setting_curve = get_setting_curve(critical_curve, setting_width)
-
-            water_exchange_curve = water_exchange_plotter(start_time,
-                                                          minutes,
-                                                          form.cleaned_data['stop_conc'],
-                                                          critical_curve,
-                                                          setting_curve)
-
-            datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
-                                                   crit_axis_start_time)
-            datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                             crit_axis_start_time)
-
-            CalculationResult.objects.all().delete()
-
-            CalculationResult.objects.create(critical_curve=critical_curve,
-                                             setting_curve=setting_curve,
-                                             water_exchange_curve=water_exchange_curve,
-                                             start_time=start_time,
-                                             stop_time=crit_axis_start_time,
-                                             stop_conc=form.cleaned_data['stop_conc'],
-                                             exp_exchange_curve={},
-                                             block=block_name)
-
-            return graph_page(request,
-                              crit_curve_dict=critical_curve,
-                              setting_dict=setting_curve,
-                              water_exchange_dict=water_exchange_curve,
-                              start_time=start_time,
-                              stop_conc=form.cleaned_data['stop_conc'],
-                              crit_axis = datetime_crit_axis,
-                              water_exchange_axis = datetime_water_exchange_axis,
-                              exp_water_exchange={},
-                              block_=block_name)
-    else:
-        form = BorCalcStartForm()
-    return render(request, 'bor_calculator/bor_calc_start_page.html', {'title': 'Расчет концентрации БК',
-                                                                       'form': form})
+class BorCalcPage(FormView, TemplateView):
+    def form_valid(self, form):
+        output_calc = form.bor_calc_handler()
+        return graph_page(self.request,
+                          crit_curve_dict=output_calc['crit_curve_dict'],
+                          setting_dict=output_calc['setting_dict'],
+                          water_exchange_dict=output_calc['water_exchange_dict'],
+                          start_time=output_calc['start_time'],
+                          stop_conc=output_calc['stop_conc'],
+                          crit_axis=output_calc['crit_axis'],
+                          water_exchange_axis=output_calc['water_exchange_axis'],
+                          exp_water_exchange=output_calc['exp_water_exchange'],
+                          block_=output_calc['block_'])
 
 
-def bor_calc_resume_page(request):
-    """
-    Страница заполнения данных для расчета при повторном запуске
-    :param request:
-    :return:
-    """
-    if request.method == 'POST':
-        form = BorCalcResumeForm(request.POST)
-        if form.is_valid():
-            block_id = int(request.POST['block'])
-            block_name = str(Block.objects.get(pk=block_id))
-
-            start_time = get_time_in_minutes(form.cleaned_data['start_time'], form.cleaned_data['stop_time'])
-            stop_conc = form.cleaned_data['stop_conc']
-
-            maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
-
-            critical_curve = critical_curve_plotter(form.cleaned_data['power_before_stop'],
-                                                    form.cleaned_data['effective_days_worked'],
-                                                    form.cleaned_data['rod_height_before_stop'],
-                                                    form.cleaned_data['crit_conc_before_stop'],
-                                                    maximum_time,
-                                                    block_id)
-
-            setting_curve = setting_curve_plotter(maximum_time, critical_curve)
-
-            water_exchange_curve = water_exchange_plotter(start_time, maximum_time, form.cleaned_data['stop_conc'],
-                                                          critical_curve, setting_curve)
-
-            datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
-                                                   form.cleaned_data['stop_time'])
-            datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                             form.cleaned_data['stop_time'])
-
-            CalculationResult.objects.all().delete()  # защищает от переполнения
+class BorCalcResumePage(BorCalcPage):
+    form_class = BorCalcResumeForm
+    template_name = 'bor_calculator/bor_calc_page.html'
 
 
-            CalculationResult.objects.create(critical_curve=critical_curve,
-                                             setting_curve=setting_curve,
-                                             water_exchange_curve=water_exchange_curve,
-                                             start_time=start_time,
-                                             stop_time=form.cleaned_data['stop_time'],
-                                             stop_conc=stop_conc,
-                                             exp_exchange_curve={},
-                                             block=block_name)
-
-            return graph_page(request,
-                              critical_curve,
-                              setting_curve,
-                              water_exchange_curve,
-                              start_time,
-                              stop_conc,
-                              datetime_crit_axis,
-                              datetime_water_exchange_axis,
-                              {},
-                              block_name)
-    else:
-        form = BorCalcResumeForm()
-    return render(request, 'bor_calculator/bor_calc_resume_page.html', {'title': 'Расчет концентрации БК',
-                                                                        'form': form})
+class BorCalcStartPage(BorCalcPage):
+    form_class = BorCalcStartForm
+    template_name = 'bor_calculator/bor_calc_page.html'
 
 
 def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
@@ -256,7 +167,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
         if water_exchange_axis[0].hour % 2 == 0:
             x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute)
         elif water_exchange_axis[0].minute != 0:
-            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute-60)
+            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute - 60)
         else:
             x_current = water_exchange_axis[0] - datetime.timedelta(hours=1)
         x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=2)
@@ -319,41 +230,49 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
         exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
     exp_water_exchange_str.sort()
 
-    return render(request, 'bor_calculator/graph_page.html', {'title': 'Добавление экспериментальных точек',
-                                                              'block_': block_, 'graph': uri,
-                                                              'crit_time': crit_time,
-                                                              'exp_data': exp_water_exchange_str})
+    return render(request,
+                  'bor_calculator/graph_page.html',
+                  {'title': 'Добавление экспериментальных точек',
+                   'block_': block_, 'graph': uri,
+                   'crit_time': crit_time,
+                   'exp_data': exp_water_exchange_str})
 
 
-def login_page(request):
-    if request.user.is_authenticated:
-        user_name = request.user
-        return render(request, 'logout_page.html', {'title': 'Авторизация пройдена', 'user_name': user_name})
-    else:
-        if request.method == 'POST':
-            form = LoginForm(request.POST)
-            if form.is_valid():
-                user = authenticate(username=form.cleaned_data['username'],
-                                    password=form.cleaned_data['password'])
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        user_name = request.user
-                        return render(request, 'logout_page.html', {'title': 'Авторизация пройдена',
-                                                                    'user_name': user_name})
-                    else:
-                        disabled_account = 'Ваш аккаунт отключен'
-                        return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
-                                                                   'failed_login': disabled_account,
-                                                                   'form': form})
-                else:
-                    invalid_login = 'Неверное имя пользователя или пароль'
-                    return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
-                                                               'failed_login': invalid_login,
-                                                               'form': form})
+class LoginPage(LoginView):
+    form_class = LoginForm
+    template_name = 'bor_calculator/bor_calc_page.html'
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            user_name = request.user
+            return render(request, 'logout_page.html', {'title': 'Авторизация пройдена', 'user_name': user_name})
         else:
-            form = LoginForm()
-        return render(request, 'login_page.html', {'title': 'Авторизация пользователя', 'form': form})
+            form = self.form_class()
+            return render(request, 'login_page.html', {'title': 'Авторизация пользователя', 'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password'],
+            )
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    user_name = request.user
+                    return render(request, 'logout_page.html', {'title': 'Авторизация пройдена',
+                                                                'user_name': user_name})
+                else:
+                    disabled_account = 'Ваш аккаунт отключен'
+                    return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
+                                                               'failed_login': disabled_account,
+                                                               'form': form})
+            else:
+                invalid_login = 'Неверное имя пользователя или пароль'
+                return render(request, 'login_page.html', {'title': 'Авторизация не пройдена',
+                                                           'failed_login': invalid_login,
+                                                           'form': form})
 
 
 def logout_user(request):

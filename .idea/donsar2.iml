@@ -5,8 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$/donsar_system" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/donsar_system/boric_acid_concentration/albums" />
       <excludeFolder url="file://$MODULE_DIR$/donsar_system/graphs" />
+      <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (donsar-test)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">

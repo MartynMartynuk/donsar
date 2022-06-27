@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import *
-from donsar_system.settings import DATE_INPUT_FORMATS
+from boric_acid_concentration.services.views_handler import *
+from boric_acid_concentration.services.water_exchange_function import *
 
 
 class AddAlbumForm(forms.ModelForm):
@@ -36,6 +37,54 @@ class BorCalcResumeForm(forms.Form):
     start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска, г/дм<sup>3</sup>')
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
+
+    def bor_calc_handler(self):
+        block_id = self.cleaned_data['block'].pk
+        block_name = self.cleaned_data['block']
+
+        start_time = get_time_in_minutes(self.cleaned_data['start_time'], self.cleaned_data['stop_time'])
+        stop_conc = self.cleaned_data['stop_conc']
+
+        maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
+
+        critical_curve = critical_curve_plotter(self.cleaned_data['power_before_stop'],
+                                                self.cleaned_data['effective_days_worked'],
+                                                self.cleaned_data['rod_height_before_stop'],
+                                                self.cleaned_data['crit_conc_before_stop'],
+                                                maximum_time,
+                                                block_id)
+
+        setting_curve = setting_curve_plotter(maximum_time, critical_curve)
+
+        water_exchange_curve = water_exchange_plotter(start_time, maximum_time, self.cleaned_data['stop_conc'],
+                                                      critical_curve, setting_curve)
+
+        datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
+                                               self.cleaned_data['stop_time'])
+        datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
+                                                         self.cleaned_data['stop_time'])
+
+        CalculationResult.objects.all().delete()  # защищает от переполнения
+
+        CalculationResult.objects.create(critical_curve=critical_curve,
+                                         setting_curve=setting_curve,
+                                         water_exchange_curve=water_exchange_curve,
+                                         start_time=start_time,
+                                         stop_time=self.cleaned_data['stop_time'],
+                                         stop_conc=stop_conc,
+                                         exp_exchange_curve={},
+                                         block=block_name)
+
+        return dict(crit_curve_dict=critical_curve,
+                    setting_dict=setting_curve,
+                    water_exchange_dict=water_exchange_curve,
+                    start_time=start_time,
+                    stop_conc=stop_conc,
+                    crit_axis=datetime_crit_axis,
+                    water_exchange_axis=datetime_water_exchange_axis,
+                    exp_water_exchange={},
+                    block_=block_name)
+
 
     def clean_power_before_stop(self):
         power = self.cleaned_data['power_before_stop']
@@ -78,6 +127,53 @@ class BorCalcStartForm(forms.Form):
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
+
+    def bor_calc_handler(self):
+        block_name = str(self.cleaned_data['block'])
+        water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
+
+        time_before_start = 5  # для начала оси координат до старта водообмена
+        time_after_start = 20  # костыль для рисования оси координат вперед
+        crit_axis_start_time = water_exchange_start_time - datetime.timedelta(hours=time_before_start)
+        crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
+        start_time = time_before_start * 60  # время начала водообмена в минутах
+        minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
+        setting_width = setting_width_chose(self.cleaned_data['critical_conc'])
+
+        critical_curve = get_static_concentration(0, minutes, self.cleaned_data['critical_conc'])
+        setting_curve = get_setting_curve(critical_curve, setting_width)
+
+        water_exchange_curve = water_exchange_plotter(start_time,
+                                                      minutes,
+                                                      self.cleaned_data['stop_conc'],
+                                                      critical_curve,
+                                                      setting_curve)
+
+        datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
+                                               crit_axis_start_time)
+        datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
+                                                         crit_axis_start_time)
+
+        CalculationResult.objects.all().delete()
+
+        CalculationResult.objects.create(critical_curve=critical_curve,
+                                         setting_curve=setting_curve,
+                                         water_exchange_curve=water_exchange_curve,
+                                         start_time=start_time,
+                                         stop_time=crit_axis_start_time,
+                                         stop_conc=self.cleaned_data['stop_conc'],
+                                         exp_exchange_curve={},
+                                         block=block_name)
+
+        return dict(crit_curve_dict=critical_curve,
+                    setting_dict=setting_curve,
+                    water_exchange_dict=water_exchange_curve,
+                    start_time=start_time,
+                    stop_conc=self.cleaned_data['stop_conc'],
+                    crit_axis=datetime_crit_axis,
+                    water_exchange_axis=datetime_water_exchange_axis,
+                    exp_water_exchange={},
+                    block_=block_name)
 
     def clean_stop_conc(self):
         concentration = self.cleaned_data['stop_conc']
