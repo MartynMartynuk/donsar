@@ -1,5 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms import DateInput
+
 from .models import *
 from boric_acid_concentration.services.views_handler import *
 from boric_acid_concentration.services.water_exchange_function import *
@@ -33,8 +35,10 @@ class BorCalcResumeForm(forms.Form):
     effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
     rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова, %')
     crit_conc_before_stop = forms.FloatField(label='Концентрация БК до останова, г/дм<sup>3</sup>')
-    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова, г/дм<sup>3</sup>')
-    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска, г/дм<sup>3</sup>')
+    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова, г/дм<sup>3</sup>',
+                                    widget=DateInput(attrs={'type': 'datetime-local'}))
+    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска, г/дм<sup>3</sup>',
+                                     widget=DateInput(attrs={'type': 'datetime-local'}))
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
@@ -123,7 +127,8 @@ class BorCalcResumeForm(forms.Form):
 
 class BorCalcStartForm(forms.Form):
     """ Форма расчета концентрации БК при первом старте после ППР """
-    water_exchange_start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время начала водообмена')
+    water_exchange_start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время начала водообмена',
+                                                    widget=DateInput(attrs={'type': 'datetime-local'}))
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
