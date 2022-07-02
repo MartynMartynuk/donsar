@@ -1,3 +1,5 @@
 Django==4.0.3
 numpy==1.22.3
 matplotlib==3.5.2
+python-docx==0.8.11
+django-crispy-forms==1.14.0
