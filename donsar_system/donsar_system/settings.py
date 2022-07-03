@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ao#)j^xj*&i+4%-$^7do^v%i=^@3e=g&xd)lc2)awodlhjp8uh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -56,7 +56,7 @@ ROOT_URLCONF = 'donsar_system.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,6 +68,8 @@ TEMPLATES = [
         },
     },
 ]
+
+# TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'))
 
 WSGI_APPLICATION = 'donsar_system.wsgi.application'
 
@@ -109,7 +111,7 @@ DATE_INPUT_FORMATS = ['%d.%m.%Y %H:%M']
 
 LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 

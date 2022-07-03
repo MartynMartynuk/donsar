@@ -218,7 +218,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     plt.ylim((water_exchange_dict[int(water_exchange_end_time) - 1] - 0.5, stop_conc + 0.1))
 
     fig = plt.gcf()
-    plt.savefig('graphs/График.png')
+    # plt.savefig('graphs/График.png')
     buf = io.BytesIO()
     fig.savefig(buf, format='png')
     buf.seek(0)

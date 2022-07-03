@@ -1,0 +1,3 @@
+sudo systemctl daemon-stop
+sudo systemctl restart docker.socket docker.service
+docker-compose logs -f
