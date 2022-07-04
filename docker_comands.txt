@@ -1,3 +1,11 @@
+Аварийные:
 sudo systemctl daemon-stop
 sudo systemctl restart docker.socket docker.service
 docker-compose logs -f
+
+
+Для создания образа docker:
+docker build -t image_name . (исполнять из папки с Dockerfile)
+docker images  - просмотр образов
+docker run -p 8000:8000 -d image_name
+docker logs -f container_id

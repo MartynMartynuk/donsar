@@ -1,3 +1,5 @@
+import datetime
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import DateInput
@@ -18,7 +20,8 @@ class AddAlbumForm(forms.ModelForm):
 class AddPointsForm(forms.Form):
     """ Форма добавления экспериментальных точек на график """
 
-    sample_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время взятия пробы')
+    sample_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время взятия пробы',
+                                      widget=DateInput(attrs={'type': 'datetime-local'}))
     sample_conc = forms.FloatField(label='Концентрация БК')
 
     def clean_sample_conc(self):
