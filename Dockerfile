@@ -1,4 +1,4 @@
-FROM python:3.8.10
+FROM python:3.8.10-slim
 ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 COPY . /app
