@@ -92,7 +92,6 @@ class BorCalcResumeForm(forms.Form):
                     exp_water_exchange={},
                     block_=block_name)
 
-
     def clean_power_before_stop(self):
         power = self.cleaned_data['power_before_stop']
         valid_power_list = [104, 100, 90, 80, 70, 60, 50, 40, 30]
@@ -121,11 +120,11 @@ class BorCalcResumeForm(forms.Form):
             raise ValidationError('Некорректный ввод: концентрация БК не может быть меньше 0!')
         return concentration
 
-    def clean_stop_conc(self):
-        concentration = self.cleaned_data['stop_conc']
-        if concentration < 10:
-            raise ValidationError('Стояночная концентрация должна превышать 10 г/дм<sup>3</sup>')
-        return concentration
+    # def clean_stop_conc(self):
+    #     concentration = self.cleaned_data['stop_conc']
+    #     if concentration < 10:
+    #         raise ValidationError('Стояночная концентрация должна превышать 10 г/дм<sup>3</sup>')
+    #     return concentration
 
 
 class BorCalcStartForm(forms.Form):

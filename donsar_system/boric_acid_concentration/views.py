@@ -220,7 +220,7 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     fig = plt.gcf()
     # plt.savefig('graphs/График.png')
     buf = io.BytesIO()
-    fig.savefig(buf, format='png')
+    # fig.savefig(buf, format='png')
     buf.seek(0)
     string = base64.b64encode(buf.read())
     uri = urllib.parse.quote(string)
