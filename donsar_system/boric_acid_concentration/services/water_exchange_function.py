@@ -50,7 +50,6 @@ def setting_curve_plotter(maximum_time, crit_curve: dict):
         setting_curve[graph_counter] = {'date': minute,
                                         'value': crit_curve[minute] + setting_width}
         graph_counter += 1
-        # setting_curve[minute] = crit_curve[minute] + setting_width
     return setting_curve
 
 
@@ -84,11 +83,7 @@ def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict
         water_exchange_curve[graph_counter] = {'date': minute,
                                                'value': water_exchange_calculator(stop_conc, 40, (minute - start_time) / 60)}
 
-        # water_exchange_curve[minute] = water_exchange_calculator(stop_conc, 40, (minute - start_time) / 60)
-
-        # print(f'{water_exchange_curve[graph_counter]["value"]} | {setting_curve[graph_counter]["date"]}')
         if water_exchange_curve[graph_counter]['value'] <= setting_curve[graph_counter]['value']:
-        # if water_exchange_curve[minute] <= setting_curve[minute]:
             start_break_time = minute
             end_break_time = start_break_time + 61
             break
@@ -98,7 +93,6 @@ def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict
         water_exchange_curve[graph_counter] = {'date': minute,
                                                'value': water_exchange_curve[graph_counter_break]['value']}
         graph_counter += 1
-        # water_exchange_curve[minute] = water_exchange_curve[start_break_time]
 
 
     for minute in range(end_break_time + 1, maximum_time):
@@ -107,9 +101,7 @@ def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict
                                                                                   10,
                                                                                   (minute - end_break_time) / 60)}
 
-        # water_exchange_curve[minute] = water_exchange_calculator(water_exchange_curve[start_break_time], 10, (minute - end_break_time) / 60)
         if water_exchange_curve[graph_counter]['value'] <= crit_curve[graph_counter]['value']:
-        # if water_exchange_curve[minute] <= crit_curve[minute]:
             break
         graph_counter += 1
     return water_exchange_curve
