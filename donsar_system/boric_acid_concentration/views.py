@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import urllib.parse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import LoginView
@@ -153,6 +154,11 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :param block_: название блока и загрузки для вывода на верху страницы
     :return:
     """
+
+    print(type(crit_curve_dict))
+    print(type(json.dumps(crit_curve_dict)))
+
+
     # ToDo выглядит как велосипед, переделать бы отсюда
     if (water_exchange_axis[-1] - water_exchange_axis[0]) < datetime.timedelta(hours=10):
         x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
@@ -233,7 +239,8 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     return render(request,
                   'bor_calculator/graph_page.html',
                   {'title': 'Добавление экспериментальных точек',
-                   'block_': block_, 'graph': uri,
+                   'block_': block_,
+                   'graph': uri,
                    'crit_time': crit_time,
                    'exp_data': exp_water_exchange_str})
 

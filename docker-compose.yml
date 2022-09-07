@@ -1,7 +1,0 @@
-version: '3.8'
-services:
-  deploy:
-    build: .
-    command: python ./donsar_system/manage.py runserver 0.0.0.0:8001
-    ports:
-      - '0.0.0.0:8001:8001'
