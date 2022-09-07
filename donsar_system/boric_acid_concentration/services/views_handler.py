@@ -37,13 +37,16 @@ def datetime_dict_to_lst(dict_):
 
 def get_static_concentration(start_minute: int, end_minute: int, concentration):
     critical_curve = {}
+    graph_counter = 0   # счетчик для графика
     for minute in range(start_minute, end_minute+1):
-        critical_curve[minute] = concentration
+        critical_curve[graph_counter] = {'date': minute, 'value': concentration}
+        graph_counter += 1
     return critical_curve
 
-
+# ToDo Объединить! Dry!
 def get_setting_curve(crit_curve: dict, setting_interval):
     setting_curve = {}
-    for minute in list(crit_curve.keys()):
-        setting_curve[minute] = crit_curve[minute] + setting_interval
+    for graph_counter in list(crit_curve.keys()):
+        setting_curve[graph_counter] = {'date': crit_curve[graph_counter]['date'],
+                                        'value': crit_curve[graph_counter]['value'] + setting_interval}
     return setting_curve

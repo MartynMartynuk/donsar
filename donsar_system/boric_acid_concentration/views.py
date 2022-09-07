@@ -154,93 +154,102 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :param block_: название блока и загрузки для вывода на верху страницы
     :return:
     """
+    # print(crit_curve_dict)
 
-    # ToDo выглядит как велосипед, переделать бы отсюда
-    if (water_exchange_axis[-1] - water_exchange_axis[0]) < datetime.timedelta(hours=10):
-        x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
-            if water_exchange_axis[0].minute != 0 \
-            else water_exchange_axis[0] - datetime.timedelta(hours=1)
-        x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=1)
-        crit_axis_str = []
-        while x_current <= x_end_point:
-            crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
-            x_current += datetime.timedelta(hours=1)
-    else:
-        if water_exchange_axis[0].hour % 2 == 0:
-            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute)
-        elif water_exchange_axis[0].minute != 0:
-            x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute - 60)
-        else:
-            x_current = water_exchange_axis[0] - datetime.timedelta(hours=1)
-        x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=2)
-        crit_axis_str = []
-        while x_current <= x_end_point:
-            crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
-            x_current += datetime.timedelta(hours=2)
-    # ToDo переделать до сюда
+    crit_curve_json = json.dumps(crit_curve_dict)
+    setting_curve_json = json.dumps(setting_dict)
+    water_exchange_json = json.dumps(water_exchange_dict)
 
-    fig, ax = plt.subplots()
-    plt.plot(crit_axis,
-             list(crit_curve_dict.values()),
-             color='r',
-             label='Критическая концентрация БК',
-             linewidth=1)
-    plt.plot(crit_axis,
-             list(setting_dict.values()),
-             color='b',
-             label='Начало пускового диапазона',
-             linewidth=1)
-    plt.plot(water_exchange_axis,
-             list(water_exchange_dict.values()),
-             color='g',
-             label='Концентрация БК при водообмене',
-             linewidth=1)
-    plt.plot(datetime_dict_to_lst(exp_water_exchange)[0],
-             datetime_dict_to_lst(exp_water_exchange)[1],
-             color='cyan',
-             marker='x',
-             label='Практические значения концентрации БК',
-             linewidth=1)
+    # print(crit_curve_json)
+    # print(setting_curve_json)
+    # print(water_exchange_json)
 
-    crit_time = datetime.datetime.strftime(water_exchange_axis[-1], DATE_INPUT_FORMATS[0])
+    # # ToDo выглядит как велосипед, переделать бы отсюда
+    # if (water_exchange_axis[-1] - water_exchange_axis[0]) < datetime.timedelta(hours=10):
+    #     x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute) \
+    #         if water_exchange_axis[0].minute != 0 \
+    #         else water_exchange_axis[0] - datetime.timedelta(hours=1)
+    #     x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=1)
+    #     crit_axis_str = []
+    #     while x_current <= x_end_point:
+    #         crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
+    #         x_current += datetime.timedelta(hours=1)
+    # else:
+    #     if water_exchange_axis[0].hour % 2 == 0:
+    #         x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute)
+    #     elif water_exchange_axis[0].minute != 0:
+    #         x_current = water_exchange_axis[0] - datetime.timedelta(minutes=water_exchange_axis[0].minute - 60)
+    #     else:
+    #         x_current = water_exchange_axis[0] - datetime.timedelta(hours=1)
+    #     x_end_point = water_exchange_axis[-1] + datetime.timedelta(hours=2)
+    #     crit_axis_str = []
+    #     while x_current <= x_end_point:
+    #         crit_axis_str.append(datetime.datetime.strftime(x_current, DATE_INPUT_FORMATS[0]))
+    #         x_current += datetime.timedelta(hours=2)
+    # # ToDo переделать до сюда
+    #
+    # fig, ax = plt.subplots()
+    # plt.plot(crit_axis,
+    #          list(crit_curve_dict.values()),
+    #          color='r',
+    #          label='Критическая концентрация БК',
+    #          linewidth=1)
+    # plt.plot(crit_axis,
+    #          list(setting_dict.values()),
+    #          color='b',
+    #          label='Начало пускового диапазона',
+    #          linewidth=1)
+    # plt.plot(water_exchange_axis,
+    #          list(water_exchange_dict.values()),
+    #          color='g',
+    #          label='Концентрация БК при водообмене',
+    #          linewidth=1)
+    # plt.plot(datetime_dict_to_lst(exp_water_exchange)[0],
+    #          datetime_dict_to_lst(exp_water_exchange)[1],
+    #          color='cyan',
+    #          marker='x',
+    #          label='Практические значения концентрации БК',
+    #          linewidth=1)
+    #
+    # crit_time = datetime.datetime.strftime(water_exchange_axis[-1], DATE_INPUT_FORMATS[0])
+    #
+    # plt.xlabel('Время')
+    # plt.ylabel(r'Концентрация БК, г/$дм^{3}$')
+    # plt.minorticks_on()
+    # plt.grid(which='major', linewidth=0.5)
+    # plt.grid(which='minor', linestyle=':')
+    # plt.legend(loc='upper right', shadow=False, fontsize=9)
+    #
+    # ax.set_xticklabels(crit_axis_str)
+    # plt.tick_params(axis='x', labelrotation=90)
+    #
+    # water_exchange_end_time = len(water_exchange_dict) + start_time
+    # plt.xlim(water_exchange_axis[0] - datetime.timedelta(hours=1),
+    #          water_exchange_axis[-1] + datetime.timedelta(hours=1))
+    # plt.ylim((water_exchange_dict[int(water_exchange_end_time) - 1] - 0.5, stop_conc + 0.1))
+    #
+    # fig = plt.gcf()
+    # # plt.savefig('graphs/График.png')
+    # buf = io.BytesIO()
+    # fig.savefig(buf, format='png')
+    # buf.seek(0)
+    # string = base64.b64encode(buf.read())
+    # uri = urllib.parse.quote(string)
 
-    plt.xlabel('Время')
-    plt.ylabel(r'Концентрация БК, г/$дм^{3}$')
-    plt.minorticks_on()
-    plt.grid(which='major', linewidth=0.5)
-    plt.grid(which='minor', linestyle=':')
-    plt.legend(loc='upper right', shadow=False, fontsize=9)
-
-    ax.set_xticklabels(crit_axis_str)
-    plt.tick_params(axis='x', labelrotation=90)
-
-    water_exchange_end_time = len(water_exchange_dict) + start_time
-    plt.xlim(water_exchange_axis[0] - datetime.timedelta(hours=1),
-             water_exchange_axis[-1] + datetime.timedelta(hours=1))
-    plt.ylim((water_exchange_dict[int(water_exchange_end_time) - 1] - 0.5, stop_conc + 0.1))
-
-    fig = plt.gcf()
-    # plt.savefig('graphs/График.png')
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png')
-    buf.seek(0)
-    string = base64.b64encode(buf.read())
-    uri = urllib.parse.quote(string)
-
-    exp_water_exchange_str = []
-    for i in exp_water_exchange.items():
-        exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
-    exp_water_exchange_str.sort()
+    # exp_water_exchange_str = []
+    # for i in exp_water_exchange.items():
+    #     exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
+    # exp_water_exchange_str.sort()
     return render(request,
                   'bor_calculator/graph_page.html',
                   {'title': 'Добавление экспериментальных точек',
                    'block_': block_,
-                   'graph': uri,
-                   'crit_time': crit_time,
-                   'exp_data': exp_water_exchange_str,
-                   'crit_curve_dict': crit_curve_dict,
-                   'setting_curve_dict': setting_dict,
-                   'water_exchange_dict': water_exchange_dict})
+                   # 'graph': uri,
+                   # 'crit_time': crit_time,
+                   # 'exp_data': exp_water_exchange_str,
+                   'crit_curve_dict': crit_curve_json,
+                   'setting_curve_dict': setting_curve_json,
+                   'water_exchange_dict': water_exchange_json})
 
 
 class LoginPage(LoginView):

@@ -13,13 +13,19 @@
     </style>
 
     <script type="text/javascript">
-        var crit_curve = "{{ crit_curve_dict }}";
-        var setting_curve = "{{ setting_curve_dict }}";
-        var water_exchange_curve = "{{ water_exchange_dict }}";
+        var crit_curve_json = "{{ crit_curve_dict }}";
+        var setting_curve_json = "{{ setting_curve_dict }}";
+        var water_exchange_curve_json = "{{ water_exchange_dict }}";
 
-        alert(crit_curve);
-        alert(setting_curve);
-        alert(water_exchange_curve);
+        crit_curve_json             = crit_curve_json.replace(/&quot;/ig,'"');
+        setting_curve_json          = setting_curve_json.replace(/&quot;/ig,'"');
+        water_exchange_curve_json   = water_exchange_curve_json.replace(/&quot;/ig,'"');
+
+        var crit_curve              = JSON.parse(crit_curve_json);
+        var setting_curve           = JSON.parse(setting_curve_json);
+        var water_exchange_curve    = JSON.parse(water_exchange_curve_json);
+
+        // alert(Object.values(water_exchange_curve));
 
 
         am5.ready(function() {
@@ -103,9 +109,9 @@
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
-        tooltip: am5.Tooltip.new(root, {
-            labelText: "{valueY}"
-        })
+        // tooltip: am5.Tooltip.new(root, {
+        //     labelText: "{valueY}"
+        // })
         }));
 
 
@@ -118,10 +124,18 @@
 
         // Set data
         var data = generateDatas(1200);
-        series.data.setAll(data);
+        series.data.setAll(water_exchange_curve);
 
-        // var data = [1, 2, 3, 4];
-        // series = [5, 6, 7, 8];
+        alert(data);
+        alert(water_exchange_curve);
+        // alert(Object.values(data)[0]);
+        // alert(Object.values(water_exchange_curve)[0]);
+        
+
+        // alert(typeof(Object.keys(data)[0]));
+        // alert(Object.values(data));
+        // alert(typeof(Object.values(data[0])[0]));
+
 
 
         // Make stuff animate on load
