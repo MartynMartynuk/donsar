@@ -1,3 +1,11 @@
+var crit_curve = "{{ crit_curve_dict }}";
+var setting_curve = "{{ setting_curve_dict }}";
+var water_exchange_curve = "{{ water_exchange_dict }}";
+
+alert(crit_curve);
+// alert(setting_curve);
+// alert(water_exchange_curve);
+
 am5.ready(function() {
 
 // Create root element
@@ -40,7 +48,7 @@ function generateData() {
   value = Math.round((Math.random() * 10 - 5) + value);
   am5.time.add(date, "day", 1);
   return {
-    date: date,
+    date: date.getTime(),
     value: value
   };
 }
@@ -95,7 +103,6 @@ chart.set("scrollbarX", am5.Scrollbar.new(root, {
 // Set data
 var data = generateDatas(1200);
 series.data.setAll(data);
-
 
 // var data = [1, 2, 3, 4];
 // series = [5, 6, 7, 8];
