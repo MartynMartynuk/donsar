@@ -61,33 +61,9 @@
         cursor.lineY.set("visible", false);
 
 
-        // Generate random data
-        var date = new Date();
-        date.setHours(0, 0, 0, 0);
-        var value = 100;
-
-        function generateData() {
-        value = Math.round((Math.random() * 10 - 5) + value);
-        am5.time.add(date, "day", 1);
-        return {
-            date: date.getTime(),
-            value: value
-        };
-        }
-
-        function generateDatas(count) {
-        var data = [];
-        for (var i = 0; i < count; ++i) {
-            data.push(generateData());
-        }
-        return data;
-        }
-
-
         // Create axes
         // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
         var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
-        // maxDeviation: 0.2,
         baseInterval: {
             timeUnit: "minute",
             count: 1
@@ -109,9 +85,6 @@
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
-        // tooltip: am5.Tooltip.new(root, {
-        //     labelText: "{valueY}"
-        // })
         }));
 
 
@@ -123,19 +96,9 @@
 
 
         // Set data
-        var data = generateDatas(1200);
         series.data.setAll(water_exchange_curve);
-
-        alert(data);
-        alert(water_exchange_curve);
-        // alert(Object.values(data)[0]);
-        // alert(Object.values(water_exchange_curve)[0]);
+        // series.data.setAll(setting_curve);
         
-
-        // alert(typeof(Object.keys(data)[0]));
-        // alert(Object.values(data));
-        // alert(typeof(Object.values(data[0])[0]));
-
 
 
         // Make stuff animate on load

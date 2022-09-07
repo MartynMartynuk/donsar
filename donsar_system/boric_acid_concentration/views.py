@@ -137,7 +137,7 @@ class BorCalcStartPage(BorCalcPage):
     template_name = 'bor_calculator/bor_calc_page.html'
 
 
-def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
+def graph_page(request, crit_curve_dict: dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
                water_exchange_axis, exp_water_exchange, block_):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
@@ -155,11 +155,12 @@ def graph_page(request, crit_curve_dict, setting_dict, water_exchange_dict, star
     :return:
     """
 
-    crit_curve_json = json.dumps(crit_curve_dict)
-    setting_curve_json = json.dumps(setting_dict)
-    water_exchange_json = json.dumps(water_exchange_dict)
 
-    # print(crit_curve_json)
+    crit_curve_json = json.dumps(list(crit_curve_dict.values()))
+    setting_curve_json = json.dumps(list(setting_dict.values()))
+    water_exchange_json = json.dumps(list(water_exchange_dict.values()))
+
+    # print(list(crit_curve_json.values()))
     # print(setting_curve_json)
     # print(water_exchange_json)
 
