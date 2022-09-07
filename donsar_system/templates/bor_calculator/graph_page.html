@@ -1,16 +1,28 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+<!--{% load static %}-->
 
 {% block content %}
-    <div>
-        <h1>{{ block_ }}</h1>
-        <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
-        <div>
-            {% for i in exp_data %}
-                <div>{{ i }}</div>
-            {% endfor %}
-        </div>
-    </div>
+
+    <style>
+        #chartdiv {
+          width: 90%;
+          height: 800px;
+        max-width: 100%
+        }
+    </style>
+
+    <div id="chartdiv"></div>
+
+<!--    <div>-->
+<!--        <h1>{{ block_ }}</h1>-->
+<!--        <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">-->
+<!--        <div>-->
+<!--            {% for i in exp_data %}-->
+<!--                <div>{{ i }}</div>-->
+<!--            {% endfor %}-->
+<!--        </div>-->
+<!--    </div>-->
     <h4>Предполагаемое время наступления критичности: <strong>{{ crit_time }}</strong></h4>
     <ul>
 <!--        <a href="{% url 'add_points' %}" class="btn btn-primary">Добавить экспериментальные точки</a>-->
