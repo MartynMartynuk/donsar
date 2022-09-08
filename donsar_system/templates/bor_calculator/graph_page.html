@@ -79,7 +79,24 @@
 
         // Add series
         // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-        var series = chart.series.push(am5xy.LineSeries.new(root, {
+        
+        var crit_curve_series = chart.series.push(am5xy.LineSeries.new(root, {
+        name: "Series",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "value",
+        valueXField: "date",
+        }));
+        
+        var setting_curve_series = chart.series.push(am5xy.LineSeries.new(root, {
+        name: "Series",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "value",
+        valueXField: "date",
+        }));
+
+        var water_exchange_series = chart.series.push(am5xy.LineSeries.new(root, {
         name: "Series",
         xAxis: xAxis,
         yAxis: yAxis,
@@ -96,8 +113,9 @@
 
 
         // Set data
-        series.data.setAll(crit_curve);
-        series.data.setAll(water_exchange_curve);
+        crit_curve_series.data.setAll(crit_curve);
+        setting_curve_series.data.setAll(setting_curve);
+        water_exchange_series.data.setAll(water_exchange_curve);
         // series.data.setAll(setting_curve);
         
 
