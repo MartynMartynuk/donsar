@@ -96,6 +96,7 @@
 
 
         // Set data
+        series.data.setAll(crit_curve);
         series.data.setAll(water_exchange_curve);
         // series.data.setAll(setting_curve);
         
@@ -109,11 +110,11 @@
         }); // end am5.ready()
     </script>
 
-    <div id="chartdiv"></div>
+    
 
    <div> 
        <h1>{{ block_ }}</h1>
-       <img src="data:image/png;base64,{{graph}}" alt="" height="100%" width="100%">
+       <div id="chartdiv"></div>
        <div>
            {% for i in exp_data %}
                <div>{{ i }}</div>

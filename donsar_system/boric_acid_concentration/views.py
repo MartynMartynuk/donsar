@@ -1,4 +1,5 @@
 import base64
+import datetime
 import io
 import json
 import urllib.parse
@@ -115,16 +116,19 @@ def add_points(request):
 class BorCalcPage(FormView, TemplateView):
     def form_valid(self, form):
         output_calc = form.bor_calc_handler()
-        return graph_page(self.request,
-                          crit_curve_dict=output_calc.crit_curve_dict,
-                          setting_dict=output_calc.setting_dict,
-                          water_exchange_dict=output_calc.water_exchange_dict,
-                          start_time=output_calc.start_time,
-                          stop_conc=output_calc.stop_conc,
-                          crit_axis=output_calc.crit_axis,
-                          water_exchange_axis=output_calc.water_exchange_axis,
-                          exp_water_exchange=output_calc.exp_water_exchange,
-                          block_=output_calc.block_)
+        return graph_page(
+            self.request,
+            crit_curve_dict=output_calc.crit_curve_dict,
+            setting_dict=output_calc.setting_dict,
+            water_exchange_dict=output_calc.water_exchange_dict,
+            start_time=output_calc.start_time,
+            water_exchange_start_time=output_calc.water_exchange_start_time,
+            stop_conc=output_calc.stop_conc,
+            crit_axis=output_calc.crit_axis,
+            water_exchange_axis=output_calc.water_exchange_axis,
+            exp_water_exchange=output_calc.exp_water_exchange,
+            block_=output_calc.block_
+        )
 
 
 class BorCalcResumePage(BorCalcPage):
@@ -137,8 +141,19 @@ class BorCalcStartPage(BorCalcPage):
     template_name = 'bor_calculator/bor_calc_page.html'
 
 
-def graph_page(request, crit_curve_dict: dict, setting_dict, water_exchange_dict, start_time, stop_conc, crit_axis,
-               water_exchange_axis, exp_water_exchange, block_):
+def graph_page(
+        request,
+        crit_curve_dict: dict,
+        setting_dict,
+        water_exchange_dict,
+        start_time,
+        water_exchange_start_time: datetime,
+        stop_conc,
+        crit_axis,
+        water_exchange_axis,
+        exp_water_exchange,
+        block_
+):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
 
@@ -154,13 +169,26 @@ def graph_page(request, crit_curve_dict: dict, setting_dict, water_exchange_dict
     :param block_: название блока и загрузки для вывода на верху страницы
     :return:
     """
+    crit_curve_lst = list(crit_curve_dict.values())
+    setting_curve_lst = list(setting_dict.values())
+    water_exchange_lst = list(water_exchange_dict.values())
 
 
-    crit_curve_json = json.dumps(list(crit_curve_dict.values()))
-    setting_curve_json = json.dumps(list(setting_dict.values()))
-    water_exchange_json = json.dumps(list(water_exchange_dict.values()))
 
-    print(start_time)
+    def get_epoch_time(process_start_time: datetime, curve_lst: list) -> list:
+        epoch = datetime.datetime.utcfromtimestamp(0)
+        process_start_time_millisec = (process_start_time.replace(tzinfo=None) - epoch - datetime.timedelta(hours=9)).total_seconds() * 1000.0
+        for element in curve_lst:
+            element['date'] = element['date'] * 60000.0 + process_start_time_millisec
+        return curve_lst
+
+    get_epoch_time(water_exchange_start_time, crit_curve_lst)
+    get_epoch_time(water_exchange_start_time, setting_curve_lst)
+    get_epoch_time(water_exchange_start_time, water_exchange_lst)
+
+    crit_curve_json = json.dumps(crit_curve_lst)
+    setting_curve_json = json.dumps(setting_curve_lst)
+    water_exchange_json = json.dumps(water_exchange_lst)
 
     # print(list(crit_curve_json.values()))
     # print(setting_curve_json)

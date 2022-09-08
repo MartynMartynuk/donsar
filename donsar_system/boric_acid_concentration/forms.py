@@ -58,7 +58,7 @@ class BorCalcResumeForm(forms.Form):
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
-    def bor_calc_handler(self):
+    def bor_calc_handler(self) -> ReturnNamedtuple:
         block_id = self.cleaned_data['block'].pk
         block_name = self.cleaned_data['block']
 
@@ -151,7 +151,7 @@ class BorCalcStartForm(forms.Form):
     critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
-    def bor_calc_handler(self) -> namedtuple:
+    def bor_calc_handler(self) -> ReturnNamedtuple:
         block_name = str(self.cleaned_data['block'])
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
         # ToDo переделать этот костыль
