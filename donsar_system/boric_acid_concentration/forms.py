@@ -1,4 +1,5 @@
 import datetime
+from collections import namedtuple
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -8,6 +9,18 @@ from .models import *
 from boric_acid_concentration.services.views_handler import *
 from boric_acid_concentration.services.water_exchange_function import *
 
+ReturnNamedtuple = namedtuple('ReturnNamedtuple', [
+    'crit_curve_dict',
+    'setting_dict',
+    'water_exchange_dict',
+    'start_time',
+    'stop_conc',
+    'crit_axis',
+    'water_exchange_axis',
+    'water_exchange_start_time',
+    'exp_water_exchange',
+    'block_'
+])
 
 class AddAlbumForm(forms.ModelForm):
     """ Форма добавления нового альбома НФХ """
@@ -38,9 +51,9 @@ class BorCalcResumeForm(forms.Form):
     effective_days_worked = forms.IntegerField(label='Число отработанных эффективных суток')
     rod_height_before_stop = forms.IntegerField(label='Подъем стержней до останова, %')
     crit_conc_before_stop = forms.FloatField(label='Концентрация БК до останова, г/дм<sup>3</sup>')
-    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова, г/дм<sup>3</sup>',
+    stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова',
                                     widget=DateInput(attrs={'type': 'datetime-local'}))
-    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска, г/дм<sup>3</sup>',
+    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска',
                                      widget=DateInput(attrs={'type': 'datetime-local'}))
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
@@ -82,15 +95,18 @@ class BorCalcResumeForm(forms.Form):
                                          exp_exchange_curve={},
                                          block=block_name)
 
-        return dict(crit_curve_dict=critical_curve,
-                    setting_dict=setting_curve,
-                    water_exchange_dict=water_exchange_curve,
-                    start_time=start_time,
-                    stop_conc=stop_conc,
-                    crit_axis=datetime_crit_axis,
-                    water_exchange_axis=datetime_water_exchange_axis,
-                    exp_water_exchange={},
-                    block_=block_name)
+        return ReturnNamedtuple(
+            crit_curve_dict=critical_curve,
+            setting_dict=setting_curve,
+            water_exchange_dict=water_exchange_curve,
+            start_time=start_time,
+            stop_conc=self.cleaned_data['stop_conc'],
+            crit_axis=datetime_crit_axis,
+            water_exchange_axis=datetime_water_exchange_axis,
+            water_exchange_start_time=start_time,
+            exp_water_exchange={},
+            block_=block_name
+        )
 
     def clean_power_before_stop(self):
         power = self.cleaned_data['power_before_stop']
@@ -135,10 +151,10 @@ class BorCalcStartForm(forms.Form):
     critical_conc = forms.FloatField(label='Критическая концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
-    def bor_calc_handler(self):
+    def bor_calc_handler(self) -> namedtuple:
         block_name = str(self.cleaned_data['block'])
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
-
+        # ToDo переделать этот костыль
         time_before_start = 5  # для начала оси координат до старта водообмена
         time_after_start = 20  # костыль для рисования оси координат вперед
         crit_axis_start_time = water_exchange_start_time - datetime.timedelta(hours=time_before_start)
@@ -172,15 +188,20 @@ class BorCalcStartForm(forms.Form):
                                          exp_exchange_curve={},
                                          block=block_name)
 
-        return dict(crit_curve_dict=critical_curve,
-                    setting_dict=setting_curve,
-                    water_exchange_dict=water_exchange_curve,
-                    start_time=start_time,
-                    stop_conc=self.cleaned_data['stop_conc'],
-                    crit_axis=datetime_crit_axis,
-                    water_exchange_axis=datetime_water_exchange_axis,
-                    exp_water_exchange={},
-                    block_=block_name)
+        return ReturnNamedtuple(
+            crit_curve_dict=critical_curve,
+            setting_dict=setting_curve,
+            water_exchange_dict=water_exchange_curve,
+            start_time=start_time,
+            stop_conc=self.cleaned_data['stop_conc'],
+            crit_axis=datetime_crit_axis,
+            water_exchange_axis=datetime_water_exchange_axis,
+            water_exchange_start_time=water_exchange_start_time,
+            exp_water_exchange={},
+            block_=block_name
+        )
+
+
 
     def clean_stop_conc(self):
         concentration = self.cleaned_data['stop_conc']

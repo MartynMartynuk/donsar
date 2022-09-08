@@ -116,15 +116,15 @@ class BorCalcPage(FormView, TemplateView):
     def form_valid(self, form):
         output_calc = form.bor_calc_handler()
         return graph_page(self.request,
-                          crit_curve_dict=output_calc['crit_curve_dict'],
-                          setting_dict=output_calc['setting_dict'],
-                          water_exchange_dict=output_calc['water_exchange_dict'],
-                          start_time=output_calc['start_time'],
-                          stop_conc=output_calc['stop_conc'],
-                          crit_axis=output_calc['crit_axis'],
-                          water_exchange_axis=output_calc['water_exchange_axis'],
-                          exp_water_exchange=output_calc['exp_water_exchange'],
-                          block_=output_calc['block_'])
+                          crit_curve_dict=output_calc.crit_curve_dict,
+                          setting_dict=output_calc.setting_dict,
+                          water_exchange_dict=output_calc.water_exchange_dict,
+                          start_time=output_calc.start_time,
+                          stop_conc=output_calc.stop_conc,
+                          crit_axis=output_calc.crit_axis,
+                          water_exchange_axis=output_calc.water_exchange_axis,
+                          exp_water_exchange=output_calc.exp_water_exchange,
+                          block_=output_calc.block_)
 
 
 class BorCalcResumePage(BorCalcPage):
@@ -159,6 +159,8 @@ def graph_page(request, crit_curve_dict: dict, setting_dict, water_exchange_dict
     crit_curve_json = json.dumps(list(crit_curve_dict.values()))
     setting_curve_json = json.dumps(list(setting_dict.values()))
     water_exchange_json = json.dumps(list(water_exchange_dict.values()))
+
+    print(start_time)
 
     # print(list(crit_curve_json.values()))
     # print(setting_curve_json)
