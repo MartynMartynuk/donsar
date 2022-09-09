@@ -13,10 +13,6 @@ ReturnNamedtuple = namedtuple('ReturnNamedtuple', [
     'crit_curve_dict',
     'setting_dict',
     'water_exchange_dict',
-    'start_time',
-    'stop_conc',
-    'crit_axis',
-    'water_exchange_axis',
     'water_exchange_start_time',
     'exp_water_exchange',
     'block_'
@@ -79,11 +75,6 @@ class BorCalcResumeForm(forms.Form):
         water_exchange_curve = water_exchange_plotter(start_time, maximum_time, self.cleaned_data['stop_conc'],
                                                       critical_curve, setting_curve)
 
-        datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
-                                               self.cleaned_data['stop_time'])
-        datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                         self.cleaned_data['stop_time'])
-
         CalculationResult.objects.all().delete()  # защищает от переполнения
 
         CalculationResult.objects.create(critical_curve=critical_curve,
@@ -99,10 +90,6 @@ class BorCalcResumeForm(forms.Form):
             crit_curve_dict=critical_curve,
             setting_dict=setting_curve,
             water_exchange_dict=water_exchange_curve,
-            start_time=start_time,
-            stop_conc=self.cleaned_data['stop_conc'],
-            crit_axis=datetime_crit_axis,
-            water_exchange_axis=datetime_water_exchange_axis,
             water_exchange_start_time=start_time,
             exp_water_exchange={},
             block_=block_name
@@ -172,10 +159,6 @@ class BorCalcStartForm(forms.Form):
                                                       critical_curve,
                                                       setting_curve)
 
-        datetime_crit_axis = get_datetime_axis(list(critical_curve.keys()),
-                                               crit_axis_start_time)
-        datetime_water_exchange_axis = get_datetime_axis(list(water_exchange_curve.keys()),
-                                                         crit_axis_start_time)
 
         CalculationResult.objects.all().delete()
 
@@ -192,10 +175,6 @@ class BorCalcStartForm(forms.Form):
             crit_curve_dict=critical_curve,
             setting_dict=setting_curve,
             water_exchange_dict=water_exchange_curve,
-            start_time=start_time,
-            stop_conc=self.cleaned_data['stop_conc'],
-            crit_axis=datetime_crit_axis,
-            water_exchange_axis=datetime_water_exchange_axis,
             water_exchange_start_time=water_exchange_start_time,
             exp_water_exchange={},
             block_=block_name

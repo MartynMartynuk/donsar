@@ -146,17 +146,12 @@ def graph_page(
         crit_curve_dict: dict,
         setting_dict,
         water_exchange_dict,
-        start_time,
         water_exchange_start_time: datetime,
-        stop_conc,
-        crit_axis,
-        water_exchange_axis,
         exp_water_exchange,
         block_
 ):
     """
     Страница вывода графика и добавления точек экспериментальной кривой водообмена
-
     :param request:
     :param crit_curve_dict: словарь критических концентраций (время: значение)
     :param setting_dict: словарь уставочных концентраций (время: значение)
