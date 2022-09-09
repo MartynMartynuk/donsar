@@ -142,10 +142,11 @@ class BorCalcStartForm(forms.Form):
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
         start_conc = self.cleaned_data['stop_conc']
         critical_conc = self.cleaned_data['critical_conc']
-        rate = 40
+        rate_40 = 40
+        rate_10 = 10
         setting_width = setting_width_chose(critical_conc)
+        minute_in_microseconds = 60000
 
-        is_water_exchange = True  # определяет наличие или отсутствие водообмена для обрыва графика
         current_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None))
         start_time = current_time
         break_minutes_counter = 0
@@ -154,51 +155,35 @@ class BorCalcStartForm(forms.Form):
         setting_curve = []
         water_exchange_curve = []
 
-        while is_water_exchange:
+        we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time)/3600000)
 
+        while we_conc > critical_conc + setting_width:
             critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
+            water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
-            we_conc = water_exchange_calculator(start_conc,
-                                                rate,
-                                                (current_time - start_time)/3600000
-                                                )
+            current_time += minute_in_microseconds  # + 1 минута
+            we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time) / 3600000)
 
-            if we_conc <= critical_curve[-1]['value']:
-                is_water_exchange = False
-            elif we_conc > setting_curve[-1]['value']:
-                water_exchange_curve.append({'date': current_time, 'value': we_conc})
-            elif we_conc <= setting_curve[-1]['value'] and break_minutes_counter < 60:
-                start_time = current_time
-                start_conc = water_exchange_curve[-1]['value']
-                break_minutes_counter +=1
-                water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
+        while we_conc <= (critical_conc + setting_width) and break_minutes_counter < 60:
+            critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
+            setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
+            water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
 
-                print(current_time)
-                print(we_conc)
-                print(water_exchange_curve[-1]['value'])
-                print(setting_curve[-1]['value'])
-                print(break_minutes_counter)
-                print()
+            break_minutes_counter += 1
+            current_time += minute_in_microseconds  # + 1 минута
 
-            elif we_conc <= setting_curve[-1]['value'] and break_minutes_counter == 60:
-                break_minutes_counter += 1
-            elif we_conc <= setting_curve[-1]['value'] and break_minutes_counter > 60:
-                rate = 10
-                water_exchange_curve.append({'date': current_time, 'value': we_conc})
+        start_time = water_exchange_curve[-1]['date']
+        start_conc = water_exchange_curve[-1]['value']
+        we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / 3600000)
 
-                print(current_time)
-                print(we_conc)
-                print(water_exchange_curve[-1]['value'])
-                print(setting_curve[-1]['value'])
-                print(break_minutes_counter)
-                print()
+        while we_conc > critical_conc:
+            critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
+            setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
+            water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
-            current_time += 60000  # + 1 минута
-
-
-            # if len(critical_3600000
-
+            current_time += minute_in_microseconds  # + 1 минута
+            we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / 3600000)
 
         return ReturnNamedtuple(
             critical_curve=critical_curve,
