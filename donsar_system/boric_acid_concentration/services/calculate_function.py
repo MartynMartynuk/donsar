@@ -163,7 +163,7 @@ def bor_efficiency(t, block_id):
     return linear_interpolate(t, day_min, day_max, dc_min, dc_max)
 
 
-def conc_calc(p, c0, dc):
+def conc_calc(p: float, c0: float, dc: float) -> float:
     """
     Определение критической концентрации БК
     :param p: компенсируемый эффект реактивности

@@ -16,6 +16,8 @@ ReturnNamedtuple = namedtuple('ReturnNamedtuple', [
     'block_'
 ])
 
+MINUTE_IN_MILLISECONDS = 60000
+
 
 class AddAlbumForm(forms.ModelForm):
     """ Форма добавления нового альбома НФХ """
@@ -48,7 +50,7 @@ class BorCalcResumeForm(forms.Form):
     crit_conc_before_stop = forms.FloatField(label='Концентрация БК до останова, г/дм<sup>3</sup>')
     stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова',
                                     widget=DateInput(attrs={'type': 'datetime-local'}))
-    start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время запуска',
+    water_exchange_start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время начала водообмена',
                                      widget=DateInput(attrs={'type': 'datetime-local'}))
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
@@ -57,39 +59,72 @@ class BorCalcResumeForm(forms.Form):
         block_id = self.cleaned_data['block'].pk
         block_name = self.cleaned_data['block']
 
-        start_time = get_time_in_minutes(self.cleaned_data['start_time'], self.cleaned_data['stop_time'])
-        stop_conc = self.cleaned_data['stop_conc']
+        stop_reactor_time = self.cleaned_data['stop_time']
+        water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
 
-        maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
+        stop_time = get_epoch_time(stop_reactor_time.replace(tzinfo=None)
+                                   -datetime.timedelta(hours=4))
+        start_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
+                                      - datetime.timedelta(hours=4))
 
-        critical_curve = critical_curve_plotter(self.cleaned_data['power_before_stop'],
-                                                self.cleaned_data['effective_days_worked'],
-                                                self.cleaned_data['rod_height_before_stop'],
-                                                self.cleaned_data['crit_conc_before_stop'],
-                                                maximum_time,
-                                                block_id)
+        critical_curve = []
+        setting_curve = []
+        water_exchange_curve = []
 
-        setting_curve = setting_curve_plotter(maximum_time, critical_curve)
+        current_time = stop_time
+        while current_time < start_time:
+            critical_conc = get_critical_concentration(
+                stop_time,
+                current_time,
+                self.cleaned_data['power_before_stop'],
+                self.cleaned_data['effective_days_worked'],
+                self.cleaned_data['rod_height_before_stop'],
+                self.cleaned_data['crit_conc_before_stop'],
+                block_id
+            )
+            critical_curve.append({'date': current_time,
+                                   'value': critical_conc})
+            setting_curve.append({'date': current_time,
+                                  'value': get_setting_width(critical_curve[-1]['value'])})
+            current_time += MINUTE_IN_MILLISECONDS
+            print(current_time)
 
-        water_exchange_curve = water_exchange_plotter(start_time, maximum_time, self.cleaned_data['stop_conc'],
-                                                      critical_curve, setting_curve)
+            # if len(critical_curve) > 1000:
+            #     break
 
-        CalculationResult.objects.all().delete()  # защищает от переполнения
+        # while current_time >=start_time:
+        #     pass
+        #     current_time += MINUTE_IN_MILLISECONDS
 
-        CalculationResult.objects.create(critical_curve=critical_curve,
-                                         setting_curve=setting_curve,
-                                         water_exchange_curve=water_exchange_curve,
-                                         start_time=start_time,
-                                         stop_time=self.cleaned_data['stop_time'],
-                                         stop_conc=stop_conc,
-                                         exp_exchange_curve={},
-                                         block=block_name)
+
+
+
+        # start_time = get_time_in_minutes(self.cleaned_data['start_time'], self.cleaned_data['stop_time'])
+        # stop_conc = self.cleaned_data['stop_conc']
+        #
+        # maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
+        #
+        #
+        # setting_curve = setting_curve_plotter(maximum_time, critical_curve)
+        #
+        # water_exchange_curve = water_exchange_plotter(start_time, maximum_time, self.cleaned_data['stop_conc'],
+        #                                               critical_curve, setting_curve)
+
+        # CalculationResult.objects.all().delete()  # защищает от переполнения
+        #
+        # CalculationResult.objects.create(critical_curve=critical_curve,
+        #                                  setting_curve=setting_curve,
+        #                                  water_exchange_curve=water_exchange_curve,
+        #                                  start_time=start_time,
+        #                                  stop_time=self.cleaned_data['stop_time'],
+        #                                  stop_conc=stop_conc,
+        #                                  exp_exchange_curve={},
+        #                                  block=block_name)
 
         return ReturnNamedtuple(
-            crit_curve_dict=critical_curve,
-            setting_dict=setting_curve,
-            water_exchange_dict=water_exchange_curve,
-            water_exchange_start_time=start_time,
+            critical_curve=critical_curve,
+            setting_curve=setting_curve,
+            water_exchange_curve=water_exchange_curve,
             exp_water_exchange={},
             block_=block_name
         )
@@ -147,8 +182,8 @@ class BorCalcStartForm(forms.Form):
         # константы
         rate_40 = 40
         rate_10 = 10
-        minute_in_microseconds = 60000
-        setting_width = setting_width_chose(critical_conc)
+
+        setting_width = get_setting_width(critical_conc)
 
         current_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
                                       - datetime.timedelta(hours=4)) # для очевидного подгона времени
@@ -166,7 +201,7 @@ class BorCalcStartForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
-            current_time += minute_in_microseconds  # + 1 минута
+            current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time) / 3600000)
 
         while we_conc <= (critical_conc + setting_width) and break_minutes_counter < 60:
@@ -175,7 +210,7 @@ class BorCalcStartForm(forms.Form):
             water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
 
             break_minutes_counter += 1
-            current_time += minute_in_microseconds  # + 1 минута
+            current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
 
         start_time = water_exchange_curve[-1]['date']
         start_conc = water_exchange_curve[-1]['value']
@@ -186,7 +221,7 @@ class BorCalcStartForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
-            current_time += minute_in_microseconds  # + 1 минута
+            current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / 3600000)
 
         return ReturnNamedtuple(

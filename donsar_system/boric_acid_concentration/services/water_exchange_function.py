@@ -2,10 +2,20 @@ import math
 from boric_acid_concentration.services.calculate_function import *
 
 
-def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_before_stop,
-                           crit_conc_before_stop, maximum_time, block_id):
+def get_critical_concentration(
+        stop_time: float,
+        current_time: float,
+        power_before_stop: float,
+        effective_days_worked: float,
+        rod_height_before_stop: float,
+        crit_conc_before_stop: float,
+        block_id: object
+) -> float:
     """
     Предоставление значений критической концентрации (от времени) для отрисовки кривой
+    :param stop_time:
+    :param current_time:
+    :return:
     :param power_before_stop: мощность реактора до останова
     :param effective_days_worked: сколько эффективных суток отработал
     :param rod_height_before_stop: подъем стержней до останова
@@ -14,23 +24,15 @@ def critical_curve_plotter(power_before_stop, effective_days_worked, rod_height_
     :param maximum_time: время, до которого рисуем кривые концентраций
     :return: словарь критических концентраций
     """
-    crit_curve = {}
-
     static_reactivity = temp_effect(power_before_stop, effective_days_worked, block_id) + \
                         group_effect(rod_height_before_stop, effective_days_worked, block_id)
 
     bor_efficiency_ = bor_efficiency(effective_days_worked, block_id)
 
     xenon_table = Album.objects.get(title='table3', block_id=block_id).content
-    graph_counter = 0
-    for minute in range(0, maximum_time):
-        xe_effect_ = xe_effect(effective_days_worked, (minute / 60), xenon_table)
-        tot_reactivity = static_reactivity + xe_effect_
-        crit_curve[graph_counter] = {'date': minute,
-                                     'value': conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)}
-        graph_counter += 1
-        # crit_curve[minute] = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
-    return crit_curve
+    xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time)/3600000, xenon_table)  # ToDo возможна ошибка
+    tot_reactivity = static_reactivity + xe_effect_
+    return conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
 
 
 # ToDo Объединить! Dry!
@@ -42,7 +44,7 @@ def setting_curve_plotter(maximum_time, crit_curve: dict):
     :return: словарь "уставочных" концентраций
     """
     max_crit_conc = crit_curve[maximum_time - 1]
-    setting_width = setting_width_chose(max_crit_conc)
+    setting_width = get_setting_width(max_crit_conc)
 
     setting_curve = {}
     graph_counter = 0
@@ -53,7 +55,7 @@ def setting_curve_plotter(maximum_time, crit_curve: dict):
     return setting_curve
 
 
-def setting_width_chose(critical_conc):
+def get_setting_width(critical_conc):
     """
     Выбирает ширину пускового диапазона
     :param critical_conc: критическая концентрация БК
