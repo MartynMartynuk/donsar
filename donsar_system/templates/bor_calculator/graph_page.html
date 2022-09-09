@@ -81,27 +81,31 @@
         // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
         
         var crit_curve_series = chart.series.push(am5xy.LineSeries.new(root, {
-        name: "Series",
+        name: "Критическая концентрация",
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
+        // fill: am5.color(0x095256),
+        stroke: am5.color(0xb30000),
         }));
         
         var setting_curve_series = chart.series.push(am5xy.LineSeries.new(root, {
-        name: "Series",
+        name: "Пусковой диапазон",
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
+        stroke: am5.color(0x6771dc),
         }));
 
         var water_exchange_series = chart.series.push(am5xy.LineSeries.new(root, {
-        name: "Series",
+        name: "Расчетная концентрация водообмена",
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
+        stroke: am5.color(0x50b300),
         }));
 
 
@@ -116,7 +120,14 @@
         crit_curve_series.data.setAll(crit_curve);
         setting_curve_series.data.setAll(setting_curve);
         water_exchange_series.data.setAll(water_exchange_curve);
-        // series.data.setAll(setting_curve);
+
+        var legend = chart.children.push(am5.Legend.new(root, {
+            layout: root.verticalLayout,
+            x: am5.percent(50),
+            y: am5.percent(5),
+            centerY: am5.percent(0)
+        }));
+        legend.data.setAll(chart.series.values);
         
 
 
