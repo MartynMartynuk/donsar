@@ -67,30 +67,33 @@ class BorCalcResumeForm(forms.Form):
         start_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
                                       - datetime.timedelta(hours=4))
 
+        power_before_stop = self.cleaned_data['power_before_stop']
+        effective_days_worked = self.cleaned_data['effective_days_worked']
+        rod_height_before_stop = self.cleaned_data['rod_height_before_stop']
+        crit_conc_before_stop = self.cleaned_data['crit_conc_before_stop']
+
+        # для значений критической концентрации
+        static_reactivity = temp_effect(power_before_stop, effective_days_worked, block_id) + \
+                            group_effect(rod_height_before_stop, effective_days_worked, block_id)
+        xenon_table = Album.objects.get(title='table3', block_id=block_id).content
+        bor_efficiency_ = bor_efficiency(effective_days_worked, block_id)
+
         critical_curve = []
         setting_curve = []
         water_exchange_curve = []
 
         current_time = stop_time
         while current_time < start_time:
-            critical_conc = get_critical_concentration(
-                stop_time,
-                current_time,
-                self.cleaned_data['power_before_stop'],
-                self.cleaned_data['effective_days_worked'],
-                self.cleaned_data['rod_height_before_stop'],
-                self.cleaned_data['crit_conc_before_stop'],
-                block_id
-            )
+            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / 3600000, xenon_table)
+            tot_reactivity = static_reactivity + xe_effect_
+            critical_conc = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
+
             critical_curve.append({'date': current_time,
                                    'value': critical_conc})
             setting_curve.append({'date': current_time,
-                                  'value': get_setting_width(critical_curve[-1]['value'])})
+                                  'value': critical_conc + get_setting_width(critical_conc)})
             current_time += MINUTE_IN_MILLISECONDS
-            print(current_time)
 
-            # if len(critical_curve) > 1000:
-            #     break
 
         # while current_time >=start_time:
         #     pass
