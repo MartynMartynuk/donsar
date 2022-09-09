@@ -17,6 +17,7 @@ ReturnNamedtuple = namedtuple('ReturnNamedtuple', [
 ])
 
 MINUTE_IN_MILLISECONDS = 60000
+HOUR_IN_MILLISECONDS = 3600000
 
 
 class AddAlbumForm(forms.ModelForm):
@@ -84,7 +85,7 @@ class BorCalcResumeForm(forms.Form):
 
         current_time = stop_time
         while current_time < start_time:
-            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / 3600000, xenon_table)
+            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / HOUR_IN_MILLISECONDS, xenon_table)
             tot_reactivity = static_reactivity + xe_effect_
             critical_conc = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
 
