@@ -52,7 +52,7 @@ class BorCalcResumeForm(forms.Form):
     stop_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время останова',
                                     widget=DateInput(attrs={'type': 'datetime-local'}))
     water_exchange_start_time = forms.DateTimeField(input_formats=DATE_INPUT_FORMATS, label='Время начала водообмена',
-                                     widget=DateInput(attrs={'type': 'datetime-local'}))
+                                                    widget=DateInput(attrs={'type': 'datetime-local'}))
     stop_conc = forms.FloatField(label='Стояночная концентрация БК, г/дм<sup>3</sup>')
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
@@ -64,9 +64,15 @@ class BorCalcResumeForm(forms.Form):
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
 
         stop_time = get_epoch_time(stop_reactor_time.replace(tzinfo=None)
-                                   -datetime.timedelta(hours=4))
+                                   - datetime.timedelta(hours=4))
         start_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
-                                      - datetime.timedelta(hours=4))
+                                    - datetime.timedelta(hours=4))
+
+        rate_40 = 40
+        rate_10 = 10
+        break_minutes_counter = 0
+
+        start_conc = self.cleaned_data['stop_conc']
 
         power_before_stop = self.cleaned_data['power_before_stop']
         effective_days_worked = self.cleaned_data['effective_days_worked']
@@ -85,34 +91,61 @@ class BorCalcResumeForm(forms.Form):
 
         current_time = stop_time
         while current_time < start_time:
-            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / HOUR_IN_MILLISECONDS, xenon_table)
+            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / HOUR_IN_MILLISECONDS,
+                                   xenon_table)
+            tot_reactivity = static_reactivity + xe_effect_
+            critical_conc = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
+            # для укорачивания графика комментировать отсюда
+            # critical_curve.append({'date': current_time,
+            #                        'value': critical_conc})
+            # setting_curve.append({'date': current_time,
+            #                       'value': critical_conc + get_setting_width(critical_conc)})
+            # до сюда
+            current_time += MINUTE_IN_MILLISECONDS
+
+        we_conc = water_exchange_calculator(start_conc + get_setting_width(start_conc),
+                                            rate_40,
+                                            (current_time - start_time) / HOUR_IN_MILLISECONDS)
+
+        while we_conc > critical_conc + get_setting_width(critical_conc):
+            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / HOUR_IN_MILLISECONDS,
+                                   xenon_table)
             tot_reactivity = static_reactivity + xe_effect_
             critical_conc = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
 
-            critical_curve.append({'date': current_time,
-                                   'value': critical_conc})
-            setting_curve.append({'date': current_time,
-                                  'value': critical_conc + get_setting_width(critical_conc)})
+            critical_curve.append({'date': current_time, 'value': critical_conc})
+            setting_curve.append({'date': current_time, 'value': critical_conc + get_setting_width(critical_conc)})
+            water_exchange_curve.append({'date': current_time, 'value': we_conc})
+
             current_time += MINUTE_IN_MILLISECONDS
+            we_conc = water_exchange_calculator(start_conc + get_setting_width(start_conc),
+                                                rate_40,
+                                                (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
+        while break_minutes_counter < 60:
+            xe_effect_ = xe_effect(effective_days_worked, (current_time - stop_time) / HOUR_IN_MILLISECONDS,
+                                   xenon_table)
+            tot_reactivity = static_reactivity + xe_effect_
+            critical_conc = conc_calc(tot_reactivity, crit_conc_before_stop, bor_efficiency_)
 
-        # while current_time >=start_time:
-        #     pass
-        #     current_time += MINUTE_IN_MILLISECONDS
+            critical_curve.append({'date': current_time, 'value': critical_conc})
+            setting_curve.append({'date': current_time, 'value': critical_conc + get_setting_width(critical_conc)})
+            water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
 
+            break_minutes_counter += 1
+            current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
 
+        start_time = water_exchange_curve[-1]['date']
+        start_conc = water_exchange_curve[-1]['value']
+        we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
+        while we_conc > critical_conc:
+            critical_curve.append({'date': current_time, 'value': critical_conc})
+            setting_curve.append({'date': current_time, 'value': critical_conc + get_setting_width(critical_conc)})
+            water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
-        # start_time = get_time_in_minutes(self.cleaned_data['start_time'], self.cleaned_data['stop_time'])
-        # stop_conc = self.cleaned_data['stop_conc']
-        #
-        # maximum_time = get_maximum_time(start_time)  # время, до которого рисуем кривые концентраций
-        #
-        #
-        # setting_curve = setting_curve_plotter(maximum_time, critical_curve)
-        #
-        # water_exchange_curve = water_exchange_plotter(start_time, maximum_time, self.cleaned_data['stop_conc'],
-        #                                               critical_curve, setting_curve)
+            current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
+            we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
         # CalculationResult.objects.all().delete()  # защищает от переполнения
         #
@@ -190,7 +223,7 @@ class BorCalcStartForm(forms.Form):
         setting_width = get_setting_width(critical_conc)
 
         current_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
-                                      - datetime.timedelta(hours=4)) # для очевидного подгона времени
+                                      - datetime.timedelta(hours=4))  # для очевидного подгона времени
         start_time = current_time
         break_minutes_counter = 0
 
@@ -198,7 +231,7 @@ class BorCalcStartForm(forms.Form):
         setting_curve = []
         water_exchange_curve = []
 
-        we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time)/3600000)
+        we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
         while we_conc > critical_conc + setting_width:
             critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
@@ -206,9 +239,9 @@ class BorCalcStartForm(forms.Form):
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
-            we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time) / 3600000)
+            we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
-        while we_conc <= (critical_conc + setting_width) and break_minutes_counter < 60:
+        while break_minutes_counter < 60:
             critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
             water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
@@ -218,7 +251,7 @@ class BorCalcStartForm(forms.Form):
 
         start_time = water_exchange_curve[-1]['date']
         start_conc = water_exchange_curve[-1]['value']
-        we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / 3600000)
+        we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
         while we_conc > critical_conc:
             critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
@@ -226,7 +259,7 @@ class BorCalcStartForm(forms.Form):
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
-            we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / 3600000)
+            we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
         return ReturnNamedtuple(
             critical_curve=critical_curve,
