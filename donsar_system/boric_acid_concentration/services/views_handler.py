@@ -2,6 +2,11 @@ import datetime
 from donsar_system.settings import DATE_INPUT_FORMATS
 
 
+def get_epoch_time(date_time: datetime) -> float:
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    return (date_time - epoch).total_seconds() * 1000.0
+
+
 def get_time_in_minutes(start_time, stop_time):
     minutes_in_hour = 1440
     return int((start_time - stop_time).days * minutes_in_hour +

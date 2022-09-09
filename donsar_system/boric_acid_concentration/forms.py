@@ -1,6 +1,5 @@
 import datetime
 from collections import namedtuple
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import DateInput
@@ -10,13 +9,13 @@ from boric_acid_concentration.services.views_handler import *
 from boric_acid_concentration.services.water_exchange_function import *
 
 ReturnNamedtuple = namedtuple('ReturnNamedtuple', [
-    'crit_curve_dict',
-    'setting_dict',
-    'water_exchange_dict',
-    'water_exchange_start_time',
+    'critical_curve',
+    'setting_curve',
+    'water_exchange_curve',
     'exp_water_exchange',
     'block_'
 ])
+
 
 class AddAlbumForm(forms.ModelForm):
     """ Форма добавления нового альбома НФХ """
@@ -141,46 +140,73 @@ class BorCalcStartForm(forms.Form):
     def bor_calc_handler(self) -> ReturnNamedtuple:
         block_name = str(self.cleaned_data['block'])
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
-        # ToDo переделать этот костыль
-        time_before_start = 5  # для начала оси координат до старта водообмена
-        time_after_start = 20  # костыль для рисования оси координат вперед
-        crit_axis_start_time = water_exchange_start_time - datetime.timedelta(hours=time_before_start)
-        crit_axis_end_time = water_exchange_start_time + datetime.timedelta(hours=time_after_start)
-        start_time = time_before_start * 60  # время начала водообмена в минутах
-        minutes = get_time_in_minutes(crit_axis_end_time, crit_axis_start_time)
-        setting_width = setting_width_chose(self.cleaned_data['critical_conc'])
+        start_conc = self.cleaned_data['stop_conc']
+        critical_conc = self.cleaned_data['critical_conc']
+        rate = 40
+        setting_width = setting_width_chose(critical_conc)
 
-        critical_curve = get_static_concentration(0, minutes, self.cleaned_data['critical_conc'])
-        setting_curve = get_setting_curve(critical_curve, setting_width)
+        is_water_exchange = True  # определяет наличие или отсутствие водообмена для обрыва графика
+        current_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None))
+        start_time = current_time
+        break_minutes_counter = 0
 
-        water_exchange_curve = water_exchange_plotter(start_time,
-                                                      minutes,
-                                                      self.cleaned_data['stop_conc'],
-                                                      critical_curve,
-                                                      setting_curve)
+        critical_curve = []
+        setting_curve = []
+        water_exchange_curve = []
+
+        while is_water_exchange:
+
+            critical_curve.append({'date': current_time, 'value': self.cleaned_data['critical_conc']})
+            setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
+
+            we_conc = water_exchange_calculator(start_conc,
+                                                rate,
+                                                (current_time - start_time)/3600000
+                                                )
+
+            if we_conc <= critical_curve[-1]['value']:
+                is_water_exchange = False
+            elif we_conc > setting_curve[-1]['value']:
+                water_exchange_curve.append({'date': current_time, 'value': we_conc})
+            elif we_conc <= setting_curve[-1]['value'] and break_minutes_counter < 60:
+                start_time = current_time
+                start_conc = water_exchange_curve[-1]['value']
+                break_minutes_counter +=1
+                water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
+
+                print(current_time)
+                print(we_conc)
+                print(water_exchange_curve[-1]['value'])
+                print(setting_curve[-1]['value'])
+                print(break_minutes_counter)
+                print()
+
+            elif we_conc <= setting_curve[-1]['value'] and break_minutes_counter == 60:
+                break_minutes_counter += 1
+            elif we_conc <= setting_curve[-1]['value'] and break_minutes_counter > 60:
+                rate = 10
+                water_exchange_curve.append({'date': current_time, 'value': we_conc})
+
+                print(current_time)
+                print(we_conc)
+                print(water_exchange_curve[-1]['value'])
+                print(setting_curve[-1]['value'])
+                print(break_minutes_counter)
+                print()
+
+            current_time += 60000  # + 1 минута
 
 
-        CalculationResult.objects.all().delete()
+            # if len(critical_3600000
 
-        CalculationResult.objects.create(critical_curve=critical_curve,
-                                         setting_curve=setting_curve,
-                                         water_exchange_curve=water_exchange_curve,
-                                         start_time=start_time,
-                                         stop_time=crit_axis_start_time,
-                                         stop_conc=self.cleaned_data['stop_conc'],
-                                         exp_exchange_curve={},
-                                         block=block_name)
 
         return ReturnNamedtuple(
-            crit_curve_dict=critical_curve,
-            setting_dict=setting_curve,
-            water_exchange_dict=water_exchange_curve,
-            water_exchange_start_time=water_exchange_start_time,
+            critical_curve=critical_curve,
+            setting_curve=setting_curve,
+            water_exchange_curve=water_exchange_curve,
             exp_water_exchange={},
             block_=block_name
         )
-
-
 
     def clean_stop_conc(self):
         concentration = self.cleaned_data['stop_conc']

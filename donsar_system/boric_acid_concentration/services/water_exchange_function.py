@@ -81,7 +81,8 @@ def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict
     graph_counter = 0
     for minute in range(start_time, maximum_time):
         water_exchange_curve[graph_counter] = {'date': minute,
-                                               'value': water_exchange_calculator(stop_conc, 40, (minute - start_time) / 60)}
+                                               'value': water_exchange_calculator(stop_conc, 40,
+                                                                                  (minute - start_time) / 60)}
 
         if water_exchange_curve[graph_counter]['value'] <= setting_curve[graph_counter]['value']:
             start_break_time = minute
@@ -94,12 +95,12 @@ def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict
                                                'value': water_exchange_curve[graph_counter_break]['value']}
         graph_counter += 1
 
-
     for minute in range(end_break_time + 1, maximum_time):
         water_exchange_curve[graph_counter] = {'date': minute,
-                                               'value': water_exchange_calculator(water_exchange_curve[graph_counter_break]['value'],
-                                                                                  10,
-                                                                                  (minute - end_break_time) / 60)}
+                                               'value': water_exchange_calculator(
+                                                   water_exchange_curve[graph_counter_break]['value'],
+                                                   10,
+                                                   (minute - end_break_time) / 60)}
 
         if water_exchange_curve[graph_counter]['value'] <= crit_curve[graph_counter]['value']:
             break
@@ -107,7 +108,14 @@ def water_exchange_plotter(start_time, maximum_time, stop_conc, crit_curve: dict
     return water_exchange_curve
 
 
-def water_exchange_calculator(c_start, rate, time, po_pr=0.992, po=0.767, v=338):
+def water_exchange_calculator(
+        c_start: float,
+        rate: float,
+        time: float,
+        po_pr: float = 0.992,
+        po: float = 0.767,
+        v: float = 338
+) -> float:
     """
     Расчет теоретической кривой водообмена
     :param c_start: стартовая (стояночная) концентрация [г/дм3]
