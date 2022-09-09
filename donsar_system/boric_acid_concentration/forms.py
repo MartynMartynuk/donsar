@@ -138,16 +138,20 @@ class BorCalcStartForm(forms.Form):
     block = forms.ModelChoiceField(queryset=Block.objects.all(), label='Блок и загрузка', empty_label='Не выбран')
 
     def bor_calc_handler(self) -> ReturnNamedtuple:
+        # считывание формы
         block_name = str(self.cleaned_data['block'])
         water_exchange_start_time = self.cleaned_data['water_exchange_start_time']
         start_conc = self.cleaned_data['stop_conc']
         critical_conc = self.cleaned_data['critical_conc']
+
+        # константы
         rate_40 = 40
         rate_10 = 10
-        setting_width = setting_width_chose(critical_conc)
         minute_in_microseconds = 60000
+        setting_width = setting_width_chose(critical_conc)
 
-        current_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None))
+        current_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
+                                      - datetime.timedelta(hours=4)) # для очевидного подгона времени
         start_time = current_time
         break_minutes_counter = 0
 
