@@ -1,5 +1,6 @@
+import math
 from boric_acid_concentration.models import Album
-from interpolation import *
+from boric_acid_concentration.services.interpolation import *
 
 
 def get_range(wide_range, mean, compare=1, int_=True):
@@ -173,115 +174,36 @@ def conc_calc(p: float, c0: float, dc: float) -> float:
     return c0 + p / (-dc)
 
 
-''' LEGACY '''
-# def function1(table1, table2, h0, t, min_day, max_day):  # x-меньшие сутки; y-большие сутки из названий таблиц
-#     key = list(table1.keys())
-#     for i in range(0, 12):
-#         if int(key[i]) < h0:
-#             h1_min = int(key[i])
-#             h1_max = int(key[i - 1])
-#             break
-#     pp1_min = float(table1[key[i]][0].replace(',', '.'))
-#     pp1_max = float(table1[key[i - 1]][0].replace(',', '.'))
-#     pp1_inter = pp1_min + (h0 - h1_min) * (pp1_max - pp1_min) / (h1_max - h1_min)
-#     p1 = float(table1[key[7]][0].replace(',', '.')) - pp1_inter
-#
-#     for i in range(0, 12):
-#         if int(key[i]) < h0:
-#             h2_min = int(key[i])
-#             h2_max = int(key[i - 1])
-#             break
-#     pp2_min = float(table2[key[i]][0].replace(',', '.'))
-#     pp2_max = float(table2[key[i - 1]][0].replace(',', '.'))
-#     pp2_inter = pp2_min + (h0 - h2_min) * (pp2_max - pp2_min) / (h2_max - h2_min)
-#     p2 = float(table2[key[7]][0].replace(',', '.')) - pp2_inter
-#
-#     return p1 + (t - min_day) * (p2 - p1) / (max_day - min_day)
-#
-#
-# def function2(table, h0):
-#     key = list(table.keys())
-#     for i in range(1, 12):
-#         if int(key[i]) < h0:
-#             h_min = int(key[i])
-#             h_max = int(key[i-1])
-#             break
-#     pp_min = float(table[key[i]][0].replace(',', '.'))
-#     pp_max = float(table[key[i-1]][0].replace(',', '.'))
-#     pp_inter = pp_min + (h0 - h_min) * (pp_max - pp_min) / (h_max - h_min)
-#     return float(table[key[7]][0].replace(',', '.')) - pp_inter
+def get_setting_width(critical_conc):
+    """
+    Выбирает ширину пускового диапазона
+    :param critical_conc: критическая концентрация БК
+    :return:
+    """
+    if critical_conc < 7.0:
+        return 1.3
+    elif critical_conc > 10.4:
+        return 1.8
+    else:
+        return 1.6
 
 
-# def temp_effect(n0, t, block_id):
-#     """
-#     Раздел 1. Поиск суммарного эффекта реактивности по т-ре и мощности
-#     поиск эффекта реактивности из таблицы 5.9
-#     :param n0: мощность до останова
-#     :param t: проработано эффективных суток
-#     :param block_id: файл альбома
-#     """
-#     table = Album.objects.get(title='table1', block_id=block_id).content
-#     row_keys = list(table.keys())
-#     columns = [104, 100, 90, 80, 70, 60, 50, 40, 30]
-#     for i in range(2, 28):
-#         if int(row_keys[i]) > t:
-#             t_max = int(row_keys[i])
-#             t_min = int(row_keys[i - 1])
-#             break
-#     for j in range(0, 10):
-#         if int(columns[j]) == n0:
-#             break
-#     p_min = float(table[row_keys[i - 1]][j].replace(',', '.'))
-#     p_max = float(table[row_keys[i]][j].replace(',', '.'))
-#     return p_min + (t - t_min) * (p_max - p_min) / (t_max - t_min)
-
-
-# def xe_effect(t, tzap, block_id, table):
-#     """
-#     Раздел 3. Эффект реактивности, вызванный ксеноном
-#     :param t: проработано эффективных суток
-#     :param tzap: время, прошедшее с останова
-#     :param block_id: файл альбома
-#     """
-#     # table = Album.objects.get(title='table3', block_id=block_id).content
-#     key = list(table.keys())
-#     table_column_names = [0, 100, 200, 300, 400, 500]
-#     for i in range(0, 73):
-#         if tzap >= 72:
-#             i = 72
-#             break
-#         elif i > tzap:
-#             break
-#     t_zap_list = [i - 1, i]
-#     for j in range(0, 6):
-#         if table_column_names[j] > t:
-#             t_list = [table_column_names[j - 1], table_column_names[j]]
-#             break
-#
-#     p_min_tzap_lst = [float(table[key[i - 1]][j - 1].replace(',', '.')),
-#                       float(table[key[i - 1]][j].replace(',', '.'))]
-#     p_max_tzap_lst = [float(table[key[i]][j - 1].replace(',', '.')),
-#                       float(table[key[i]][j].replace(',', '.'))]
-#
-#     p_tzap_iter = [linear_interpolate_list(t, t_list, p_min_tzap_lst),
-#                    linear_interpolate_list(t, t_list, p_max_tzap_lst)]
-#
-#     return linear_interpolate_list(tzap, t_zap_list, p_tzap_iter)
-
-
-# def bor_efficiency(t, block_id):
-#     """
-#     Эффективность БК
-#     :param t: проработано эффективных суток
-#     :param block_id: файл альбома
-#     """
-#     table = Album.objects.get(title='table4', block_id=block_id).content
-#     table_key = list(table.keys())
-#     for i in range(0, 27):
-#         if float(table_key[i].replace(',', '.')) > t:
-#             table4_t_max = float(table_key[i].replace(',', '.'))
-#             table4_t_min = float(table_key[i - 1].replace(',', '.'))
-#             break
-#     dc_max = float(table[table_key[i]][11].replace(',', '.'))
-#     dc_min = float(table[table_key[i - 1]][11].replace(',', '.'))
-#     return dc_min + (t - table4_t_min) * (dc_max - dc_min) / (table4_t_max - table4_t_min)
+def water_exchange_calculator(
+        c_start: float,
+        rate: float,
+        time: float,
+        po_pr: float = 0.992,
+        po: float = 0.767,
+        v: float = 338
+) -> float:
+    """
+    Расчет теоретической кривой водообмена
+    :param c_start: стартовая (стояночная) концентрация [г/дм3]
+    :param rate: расход [т/ч]
+    :param time: время водообмена [ч]
+    :param po_pr: плотность продувки
+    :param po: плотность раствора
+    :param v: объем 1 контура
+    :return: концентрация [г/дм3]
+    """
+    return c_start * math.exp(-(rate * po_pr) / (po * v) * time)

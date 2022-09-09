@@ -1,23 +1,11 @@
-import datetime
-from collections import namedtuple
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import DateInput
-
+from .services.views_handler import *
+from .services.calculate_function import *
+from donsar_system.settings import DATE_INPUT_FORMATS
 from .models import *
-from boric_acid_concentration.services.views_handler import *
-from boric_acid_concentration.services.water_exchange_function import *
-
-ReturnNamedtuple = namedtuple('ReturnNamedtuple', [
-    'critical_curve',
-    'setting_curve',
-    'water_exchange_curve',
-    'exp_water_exchange',
-    'block_'
-])
-
-MINUTE_IN_MILLISECONDS = 60000
-HOUR_IN_MILLISECONDS = 3600000
+from .services.config import *
 
 
 class AddAlbumForm(forms.ModelForm):
