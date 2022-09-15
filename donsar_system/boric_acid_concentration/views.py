@@ -1,4 +1,6 @@
 import json
+from datetime import tzinfo
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
@@ -67,44 +69,36 @@ def add_points(request):
         form = AddPointsForm(request.POST)
 
         if form.is_valid():
-            datetime_crit_axis = get_datetime_axis(get_int_lst(list(last_calculation_obj.critical_curve.keys())),
-                                                   last_calculation_obj.stop_time)
+            sample_epoch_time = get_epoch_time(form.cleaned_data['sample_time'].replace(tzinfo=None)
+                                               - datetime.timedelta(hours=4))
+            sample_concentration = float(form.cleaned_data['sample_conc'])
 
-            water_exchange_lst = get_int_lst(list(last_calculation_obj.water_exchange_curve.keys()))
-            water_exchange_curve = dict(
-                zip(water_exchange_lst, list(last_calculation_obj.water_exchange_curve.values())))
-            # из-за того что в базе словарь сохраняется как json, требуется этот велосипед с пересборкой словаря
-            # без него не работает ограничение вывода по оси y
-
-            datetime_water_exchange_axis = get_datetime_axis(
-                get_int_lst(list(last_calculation_obj.water_exchange_curve.keys())),
-                last_calculation_obj.stop_time)
-
-            last_calculation_obj.exp_exchange_curve[datetime.datetime.strftime(form.cleaned_data['sample_time'],
-                                                                               DATE_INPUT_FORMATS[0])] \
-                = float(form.cleaned_data['sample_conc'])
+            last_calculation_obj.experimental_exchange_curve.append(
+                {'date': sample_epoch_time, 'value': sample_concentration}
+            )
             last_calculation_obj.save()
 
-            return graph_page(request,
-                              last_calculation_obj.critical_curve,
-                              last_calculation_obj.setting_curve,
-                              water_exchange_curve,
-                              last_calculation_obj.start_time,
-                              last_calculation_obj.stop_conc,
-                              datetime_crit_axis,
-                              datetime_water_exchange_axis,
-                              last_calculation_obj.exp_exchange_curve,
-                              block_)
+            return graph_page(
+                request,
+                crit_curve = last_calculation_obj.critical_curve,
+                setting_curve = last_calculation_obj.setting_curve,
+                water_exchange_curve = last_calculation_obj.water_exchange_curve,
+                break_start_time = last_calculation_obj.break_start_time,
+                break_end_time = last_calculation_obj.break_end_time,
+                crit_conc_time = last_calculation_obj.crit_conc_time,
+                experimental_water_exchange = last_calculation_obj.experimental_exchange_curve,
+                block_ = block_
+            )
     else:
         form = AddPointsForm()
     exp_water_exchange_str = []
-    for i in last_calculation_obj.exp_exchange_curve.items():
-        exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
-    exp_water_exchange_str.sort()
+    # for i in last_calculation_obj.exp_exchange_curve.items():
+    #     exp_water_exchange_str.append(f'{i[0]} | {i[1]}')
+    # exp_water_exchange_str.sort()
     return render(request, 'bor_calculator/add_points_page.html', {'title': 'Добавление экспериментальных точек',
                                                                    'block_': block_,
-                                                                   'form': form,
-                                                                   'exp_data': exp_water_exchange_str})
+                                                                   'form': form,})
+                                                                   # 'exp_data': exp_water_exchange_str})
 
 
 class BorCalcPage(FormView, TemplateView):
@@ -118,7 +112,7 @@ class BorCalcPage(FormView, TemplateView):
             break_start_time=output_calc.break_start_time,
             break_end_time=output_calc.break_end_time,
             crit_conc_time=output_calc.crit_conc_time,
-            exp_water_exchange=output_calc.exp_water_exchange,
+            experimental_water_exchange=output_calc.exp_water_exchange,
             block_=output_calc.block_
         )
 
@@ -141,7 +135,7 @@ def graph_page(
         break_start_time: float,
         break_end_time: float,
         crit_conc_time: float,
-        exp_water_exchange: dict,
+        experimental_water_exchange: list,
         block_
 ):
     """
@@ -162,19 +156,23 @@ def graph_page(
     crit_curve_json = json.dumps(crit_curve)
     setting_curve_json = json.dumps(setting_curve)
     water_exchange_json = json.dumps(water_exchange_curve)
+    exp_exchange_json = json.dumps(experimental_water_exchange)
 
     # print(list(crit_curve_json.values()))
     # print(setting_curve_json)
-    # print(water_exchange_json)
+
+    print(exp_exchange_json)
+    print(water_exchange_json)
 
     return render(
         request,
         'bor_calculator/graph_page.html',
         {'title': 'Добавление экспериментальных точек',
          'block_': block_,
-         'crit_curve_dict': crit_curve_json,
-         'setting_curve_dict': setting_curve_json,
-         'water_exchange_dict': water_exchange_json,
+         'crit_curve': crit_curve_json,
+         'setting_curve': setting_curve_json,
+         'water_exchange': water_exchange_json,
+         'experimental_exchange': exp_exchange_json,
          'break_start_time': get_datetime_time(break_start_time),
          'break_end_time': get_datetime_time(break_end_time),
          'crit_conc_time': get_datetime_time(crit_conc_time),

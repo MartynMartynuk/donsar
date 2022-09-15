@@ -30,6 +30,9 @@ class CalculationResult(models.Model):
     setting_curve = models.JSONField()
     water_exchange_curve = models.JSONField()
     experimental_exchange_curve = models.JSONField(null=True)
+    break_start_time = models.FloatField(null=True)
+    break_end_time = models.FloatField(null=True)
+    crit_conc_time = models.FloatField(null=True)
     block = models.CharField(max_length=15, null=True)
 
     class Meta:

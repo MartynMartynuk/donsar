@@ -13,17 +13,22 @@
     </style>
 
     <script type="text/javascript">
-        var crit_curve_json = "{{ crit_curve_dict }}";
-        var setting_curve_json = "{{ setting_curve_dict }}";
-        var water_exchange_curve_json = "{{ water_exchange_dict }}";
+        var crit_curve_json = "{{ crit_curve }}";
+        var setting_curve_json = "{{ setting_curve }}";
+        var water_exchange_curve_json = "{{ water_exchange }}";
+        var exp_exchange_curve_json = "{{ experimental_exchange }}"
 
         crit_curve_json             = crit_curve_json.replace(/&quot;/ig,'"');
         setting_curve_json          = setting_curve_json.replace(/&quot;/ig,'"');
         water_exchange_curve_json   = water_exchange_curve_json.replace(/&quot;/ig,'"');
+        exp_exchange_curve_json   = exp_exchange_curve_json.replace(/&quot;/ig,'"');
 
         var crit_curve              = JSON.parse(crit_curve_json);
         var setting_curve           = JSON.parse(setting_curve_json);
         var water_exchange_curve    = JSON.parse(water_exchange_curve_json);
+        var exp_exchange_curve      = JSON.parse(exp_exchange_curve_json);
+
+        alert(exp_exchange_curve)
 
 
         am5.ready(function() {
@@ -104,6 +109,15 @@
         valueYField: "value",
         valueXField: "date",
         stroke: am5.color(0x50b300),
+        }));
+
+        var exp_exchange_series = chart.series.push(am5xy.LineSeries.new(root, {
+        name: "Реальная концентрация водообмена",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "value",
+        valueXField: "date",
+        stroke: am5.color(0xCD5C5C),
         }));
 
 

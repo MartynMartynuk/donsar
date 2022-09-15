@@ -147,7 +147,10 @@ class BorCalcResumeForm(forms.Form):
         CalculationResult.objects.create(critical_curve=critical_curve,
                                          setting_curve=setting_curve,
                                          water_exchange_curve=water_exchange_curve,
-                                         experimental_exchange_curve={},
+                                         experimental_exchange_curve=[],
+                                         break_start_time = break_start_time,
+                                         break_end_time = break_end_time,
+                                         crit_conc_time = crit_conc_time,
                                          block=block_name)
 
         return ReturnNamedtuple(
@@ -157,7 +160,7 @@ class BorCalcResumeForm(forms.Form):
             break_start_time=break_start_time,
             break_end_time=break_end_time,
             crit_conc_time=crit_conc_time,
-            exp_water_exchange={},
+            exp_water_exchange=[],
             block_=block_name
         )
 
@@ -267,7 +270,10 @@ class BorCalcStartForm(forms.Form):
         CalculationResult.objects.create(critical_curve=critical_curve,
                                          setting_curve=setting_curve,
                                          water_exchange_curve=water_exchange_curve,
-                                         experimental_exchange_curve={},
+                                         experimental_exchange_curve=[],
+                                         break_start_time=break_start_time,
+                                         break_end_time=break_end_time,
+                                         crit_conc_time=crit_conc_time,
                                          block=block_name)
 
         return ReturnNamedtuple(
@@ -277,7 +283,7 @@ class BorCalcStartForm(forms.Form):
             break_start_time=break_start_time,
             break_end_time=break_end_time,
             crit_conc_time=crit_conc_time,
-            exp_water_exchange={},
+            exp_water_exchange=[],
             block_=block_name
         )
 
