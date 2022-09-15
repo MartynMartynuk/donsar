@@ -1,8 +1,4 @@
-import base64
-import datetime
-import io
 import json
-import urllib.parse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
@@ -119,6 +115,9 @@ class BorCalcPage(FormView, TemplateView):
             crit_curve=output_calc.critical_curve,
             setting_curve=output_calc.setting_curve,
             water_exchange_curve=output_calc.water_exchange_curve,
+            break_start_time=output_calc.break_start_time,
+            break_end_time=output_calc.break_end_time,
+            crit_conc_time=output_calc.crit_conc_time,
             exp_water_exchange=output_calc.exp_water_exchange,
             block_=output_calc.block_
         )
@@ -139,7 +138,10 @@ def graph_page(
         crit_curve: list,
         setting_curve: list,
         water_exchange_curve: list,
-        exp_water_exchange,
+        break_start_time: float,
+        break_end_time: float,
+        crit_conc_time: float,
+        exp_water_exchange: dict,
         block_
 ):
     """
@@ -165,13 +167,18 @@ def graph_page(
     # print(setting_curve_json)
     # print(water_exchange_json)
 
-    return render(request,
-                  'bor_calculator/graph_page.html',
-                  {'title': 'Добавление экспериментальных точек',
-                   'block_': block_,
-                   'crit_curve_dict': crit_curve_json,
-                   'setting_curve_dict': setting_curve_json,
-                   'water_exchange_dict': water_exchange_json})
+    return render(
+        request,
+        'bor_calculator/graph_page.html',
+        {'title': 'Добавление экспериментальных точек',
+         'block_': block_,
+         'crit_curve_dict': crit_curve_json,
+         'setting_curve_dict': setting_curve_json,
+         'water_exchange_dict': water_exchange_json,
+         'break_start_time': get_datetime_time(break_start_time),
+         'break_end_time': get_datetime_time(break_end_time),
+         'crit_conc_time': get_datetime_time(crit_conc_time),
+         })
 
 
 class LoginPage(LoginView):

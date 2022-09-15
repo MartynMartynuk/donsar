@@ -56,6 +56,10 @@ class BorCalcResumeForm(forms.Form):
         start_time = get_epoch_time(water_exchange_start_time.replace(tzinfo=None)
                                     - datetime.timedelta(hours=4))
 
+        break_start_time = 0
+        break_end_time = 0
+        crit_conc_time = 0
+
         rate_40 = 40
         rate_10 = 10
         break_minutes_counter = 0
@@ -105,6 +109,7 @@ class BorCalcResumeForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + get_setting_width(critical_conc)})
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
+            break_start_time = current_time
             current_time += MINUTE_IN_MILLISECONDS
             we_conc = water_exchange_calculator(start_conc + get_setting_width(start_conc),
                                                 rate_40,
@@ -120,6 +125,7 @@ class BorCalcResumeForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + get_setting_width(critical_conc)})
             water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
 
+            break_end_time = current_time
             break_minutes_counter += 1
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
 
@@ -132,6 +138,7 @@ class BorCalcResumeForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + get_setting_width(critical_conc)})
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
+            crit_conc_time = current_time
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
@@ -150,6 +157,9 @@ class BorCalcResumeForm(forms.Form):
             critical_curve=critical_curve,
             setting_curve=setting_curve,
             water_exchange_curve=water_exchange_curve,
+            break_start_time=break_start_time,
+            break_end_time=break_end_time,
+            crit_conc_time=crit_conc_time,
             exp_water_exchange={},
             block_=block_name
         )
@@ -214,6 +224,9 @@ class BorCalcStartForm(forms.Form):
                                       - datetime.timedelta(hours=4))  # для очевидного подгона времени
         start_time = current_time
         break_minutes_counter = 0
+        break_start_time = 0
+        break_end_time = 0
+        crit_conc_time = 0
 
         critical_curve = []
         setting_curve = []
@@ -226,6 +239,7 @@ class BorCalcStartForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
+            break_start_time = current_time
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_40, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
@@ -234,6 +248,7 @@ class BorCalcStartForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
             water_exchange_curve.append({'date': current_time, 'value': water_exchange_curve[-1]['value']})
 
+            break_end_time = current_time
             break_minutes_counter += 1
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
 
@@ -246,6 +261,7 @@ class BorCalcStartForm(forms.Form):
             setting_curve.append({'date': current_time, 'value': critical_conc + setting_width})
             water_exchange_curve.append({'date': current_time, 'value': we_conc})
 
+            crit_conc_time = current_time
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
@@ -253,6 +269,9 @@ class BorCalcStartForm(forms.Form):
             critical_curve=critical_curve,
             setting_curve=setting_curve,
             water_exchange_curve=water_exchange_curve,
+            break_start_time=break_start_time,
+            break_end_time=break_end_time,
+            crit_conc_time=crit_conc_time,
             exp_water_exchange={},
             block_=block_name
         )
