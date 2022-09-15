@@ -2,5 +2,6 @@
 /.git
 .gitignore
 db.sqlite3
+donsar_system/mazafaka.py
 /donsar_system/boric_acid_concentration/albums
 /donsar_system/graphs
