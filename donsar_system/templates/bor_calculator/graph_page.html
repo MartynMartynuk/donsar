@@ -28,10 +28,8 @@
         var water_exchange_curve    = JSON.parse(water_exchange_curve_json);
         var exp_exchange_curve      = JSON.parse(exp_exchange_curve_json);
 
-        alert(exp_exchange_curve)
 
-
-        am5.ready(function() {
+            am5.ready(function() {
 
         // Create root element
         // https://www.amcharts.com/docs/v5/getting-started/#Root_element
@@ -117,7 +115,8 @@
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
-        stroke: am5.color(0xCD5C5C),
+        fill: am5.color(0x095256),
+        stroke: am5.color(0xFFFF00),
         }));
 
 

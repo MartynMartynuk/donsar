@@ -160,9 +160,8 @@ def graph_page(
 
     # print(list(crit_curve_json.values()))
     # print(setting_curve_json)
-
-    print(exp_exchange_json)
-    print(water_exchange_json)
+    # print(exp_exchange_json)
+    # print(water_exchange_json)
 
     return render(
         request,
