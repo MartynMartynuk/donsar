@@ -142,16 +142,13 @@ class BorCalcResumeForm(forms.Form):
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
-        # CalculationResult.objects.all().delete()  # защищает от переполнения
-        #
-        # CalculationResult.objects.create(critical_curve=critical_curve,
-        #                                  setting_curve=setting_curve,
-        #                                  water_exchange_curve=water_exchange_curve,
-        #                                  start_time=start_time,
-        #                                  stop_time=self.cleaned_data['stop_time'],
-        #                                  stop_conc=stop_conc,
-        #                                  exp_exchange_curve={},
-        #                                  block=block_name)
+        CalculationResult.objects.all().delete()  # защищает от переполнения
+
+        CalculationResult.objects.create(critical_curve=critical_curve,
+                                         setting_curve=setting_curve,
+                                         water_exchange_curve=water_exchange_curve,
+                                         experimental_exchange_curve={},
+                                         block=block_name)
 
         return ReturnNamedtuple(
             critical_curve=critical_curve,
@@ -264,6 +261,14 @@ class BorCalcStartForm(forms.Form):
             crit_conc_time = current_time
             current_time += MINUTE_IN_MILLISECONDS  # + 1 минута
             we_conc = water_exchange_calculator(start_conc, rate_10, (current_time - start_time) / HOUR_IN_MILLISECONDS)
+
+        CalculationResult.objects.all().delete()  # защищает от переполнения
+
+        CalculationResult.objects.create(critical_curve=critical_curve,
+                                         setting_curve=setting_curve,
+                                         water_exchange_curve=water_exchange_curve,
+                                         experimental_exchange_curve={},
+                                         block=block_name)
 
         return ReturnNamedtuple(
             critical_curve=critical_curve,

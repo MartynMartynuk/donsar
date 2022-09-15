@@ -146,14 +146,9 @@
             <h4> Время начала перемешивания: {{ break_start_time }} </h4>
             <h4> Время окончания перемешивания: {{ break_end_time }} </h4>
             <h4> Время достижения критичности: {{ crit_conc_time }} </h4>
-
-           {% for i in exp_data %}
-               <div>{{ i }}</div>
-           {% endfor %}
        </div>
-<!--    </div>
-    <h4>Предполагаемое время наступления критичности: <strong>{{ crit_time }}</strong></h4>
+   </div>
     <ul>
-      <a href="{% url 'add_points' %}" class="btn btn-primary">Добавить экспериментальные точки</a>-->
+      <a href="{% url 'add_points' %}" class="btn btn-primary">Добавить экспериментальные точки</a>
     </ul>
 {% endblock %}
