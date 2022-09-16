@@ -115,9 +115,18 @@
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
-        fill: am5.color(0x095256),
-        stroke: am5.color(0xFFFF00),
+        stroke: am5.color(0x191970),
+        fill: am5.color(0x191970),
         }));
+
+        exp_exchange_series.bullets.push(function() {
+            return am5.Bullet.new(root, {
+            sprite: am5.Circle.new(root, {
+                radius: 5,
+                fill: exp_exchange_series.get("fill")
+            })
+        });
+        });
 
 
         // Add scrollbar
@@ -131,6 +140,7 @@
         crit_curve_series.data.setAll(crit_curve);
         setting_curve_series.data.setAll(setting_curve);
         water_exchange_series.data.setAll(water_exchange_curve);
+        exp_exchange_series.data.setAll(exp_exchange_curve);
 
         var legend = chart.children.push(am5.Legend.new(root, {
             layout: root.verticalLayout,
@@ -144,7 +154,11 @@
 
         // Make stuff animate on load
         // https://www.amcharts.com/docs/v5/concepts/animations/
-        series.appear(1000);
+        crit_curve_series.appear(1000);
+        setting_curve_series.appear(1000);
+        water_exchange_series.appear(1000);
+        water_exchange_series.appear(1000);
+        exp_exchange_series.appear(1000);
         chart.appear(1000, 100);
 
         }); // end am5.ready()
