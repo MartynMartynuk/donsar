@@ -1,6 +1,4 @@
 import json
-from datetime import tzinfo
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
@@ -9,7 +7,6 @@ from .forms import *
 from .models import *
 from boric_acid_concentration.services.album_handler import *
 from boric_acid_concentration.services.views_handler import *
-from donsar_system.settings import DATE_INPUT_FORMATS
 
 
 def add_album_page(request):

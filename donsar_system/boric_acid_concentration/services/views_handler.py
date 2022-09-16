@@ -9,17 +9,3 @@ def get_epoch_time(date_time: datetime) -> float:
 def get_datetime_time(epoch_time: float) -> datetime:
     return datetime.datetime.utcfromtimestamp(int(epoch_time/1000)) \
            + datetime.timedelta(hours=4)   # для очевидного подгона времени
-
-
-def get_datetime_axis(lst, start_time):
-    datetime_axis = []
-    for minute in lst:
-        datetime_axis.append(start_time + datetime.timedelta(minutes=minute))
-    return datetime_axis
-
-
-def get_int_lst(lst):
-    int_lst = []
-    for i in lst:
-        int_lst.append(int(i))
-    return int_lst
