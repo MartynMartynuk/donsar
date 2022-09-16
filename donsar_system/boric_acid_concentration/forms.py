@@ -95,7 +95,7 @@ class BorCalcResumeForm(forms.Form):
             # до сюда
             current_time += MINUTE_IN_MILLISECONDS
 
-        we_conc = water_exchange_calculator(start_conc + get_setting_width(start_conc),
+        we_conc = water_exchange_calculator(start_conc,
                                             rate_40,
                                             (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
@@ -111,7 +111,7 @@ class BorCalcResumeForm(forms.Form):
 
             break_start_time = current_time
             current_time += MINUTE_IN_MILLISECONDS
-            we_conc = water_exchange_calculator(start_conc + get_setting_width(start_conc),
+            we_conc = water_exchange_calculator(start_conc,
                                                 rate_40,
                                                 (current_time - start_time) / HOUR_IN_MILLISECONDS)
 
